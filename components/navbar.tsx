@@ -32,6 +32,7 @@ import {Tab, Tabs} from "@nextui-org/tabs";
 import React, {useContext, useEffect, useState} from "react";
 import api from "@/services/useApi";
 import {GetMenuResult} from "@/services/digimal";
+import {Profile} from "@/components/pages/layout/profile";
 export const Navbar = () => {
     const router = useRouter()
     const onLogin = () => {
@@ -83,9 +84,7 @@ export const Navbar = () => {
                 <NavbarContent
                     justify="end"
                 >
-                    <UButton variant="bordered" onClick={onLogin}>
-                        ورود | ثبت نام
-                    </UButton>
+                    <Profile onLogin={onLogin}/>
                     <UBadge content="5" color="danger" placement="bottom-right">
                         <UButton variant="ghost" isIconOnly
                                  endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>

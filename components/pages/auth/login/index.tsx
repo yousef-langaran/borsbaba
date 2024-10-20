@@ -1,24 +1,156 @@
-import {ReactNode} from "react";
+import {ReactNode, useState} from "react";
 import {UCard, UCardBody, UCardHeader} from "@/components/base/card";
 import {Logo} from "@/components/icons";
+import {UInput} from "@/components/base/input";
+import {UButton} from "@/components/base/button/button";
+import {ULink} from "@/components/base/link/link";
+import {UIcon} from "@/components/base/icon";
+import api from "@/services/useApi";
+import {motion, AnimatePresence} from "framer-motion"
+import Cookies from "js-cookie";
+import {useRouter} from "next/router";
 
 interface PagesLoginProps {
     children?: ReactNode
 }
 
-export const PagesLogin = ({children,...props}: PagesLoginProps) => {
+export const PagesLogin = (props: PagesLoginProps) => {
+    const router = useRouter()
+    const [isSignInType, setIsSignInType] = useState(0)
+    const [username, setUsername] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const onSetUser = (username: string) => {
+        setUsername(username)
+        setIsSignInType(1)
+    }
+    const onLogin = async (password: string) => {
+        setIsLoading(true)
+        const {data} = await api.TokenAuthApi.apiTokenAuthAuthenticatePost({
+            userNameOrEmailAddress: username,
+            password: password
+        })
+        Cookies.set('token',data.result.accessToken)
+        router.push('/')
+        setIsLoading(false)
+    }
+    const loginComponent = () => {
+        if (isSignInType === 0) {
+            return <PagesLoginSetUser onLoginClick={onSetUser}/>
+        } else if (isSignInType === 1) {
+            return <PagesLoginSetPassword onLoginClick={onLogin} loading={isLoading}/>
+        }
+    }
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            <UCard className="w-96">
+            <motion.div layout>
+            <UCard className="w-[27rem] p-4">
                 <UCardHeader>
-                    <Logo/>
-                    پرومال
+                    <div className="flex justify-between w-full">
+                        <div className="w-10"></div>
+                        <div className="flex items-center">
+                            <Logo/>
+                            <span>پرومال</span>
+                        </div>
+                        <div className="w-10">
+                            <AnimatePresence>
+                                {isSignInType !== 0 && (
+                                    <motion.div
+                                        initial={{opacity: 0, scale: 0}}  // حالت اولیه (ورودی)
+                                        animate={{opacity: 1, scale: 1}}    // حالت نهایی (ورودی)
+                                        exit={{opacity: 0, scale: 0}}     // حالت خروجی (محو شدن و حرکت به چپ)
+                                        transition={{duration: 0.3}}    // مدت زمان انیمیشن
+                                    >
+                                        <UButton isIconOnly onClick={() => setIsSignInType(0)}>
+                                            <UIcon fontSize={20} icon="solar:arrow-left-outline"/>
+                                        </UButton>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
                 </UCardHeader>
-                <UCardBody>
-                    <h1>ورود | ثبت نام</h1>
-                    <h5></h5>
-                </UCardBody>
+                <div>
+                    <AnimatePresence mode="wait">
+                        {isSignInType !== null && (
+                            <motion.div
+                                key={isSignInType} // استفاده از key برای هماهنگی با AnimatePresence
+                                initial={{ opacity: 0, y: 20 }} // انیمیشن اولیه (محو و کمی پایین)
+                                animate={{ opacity: 1, y: 0 }}  // انیمیشن نهایی (نمایش کامل)
+                                exit={{ opacity: 0, y: -20 }}    // انیمیشن خروج (محو و حرکت به بالا)
+                                transition={{ duration: 0.3 }}   // مدت زمان انیمیشن
+                                layout
+                            >
+                                {loginComponent()}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </UCard>
+            </motion.div>
         </div>
+    )
+}
+
+interface PagesLoginSetUserProps {
+    onLoginClick: (username: string) => void;
+}
+
+const PagesLoginSetUser = (props: PagesLoginSetUserProps) => {
+    const [username, setUsername] = useState('')
+    return (
+        <>
+            <UCardBody className="text-right">
+                <h1 className="text-2xl mb-8 font-bold">ورود | ثبت نام</h1>
+                <h5 className="text-base">سلام!</h5>
+                <h5 className="text-base">لطفا شماره موبایل یا ایمیل خود را وارد کنید</h5>
+                <UInput value={username} onValueChange={setUsername} dir="ltr" className="mt-12" variant="bordered"
+                        size="lg"/>
+                <UButton className="mt-12" color="primary" onClick={() => props.onLoginClick(username)}>
+                    ورود
+                </UButton>
+                <div className="mx-auto mt-4">
+                    <p className="text-xs mt-4">ورود شما به معنای پذیرش<ULink className="mx-1 inline-block text-xs"
+                                                                              href="/page/terms/">شرایط
+                        دیجی‌کالا</ULink>و<ULink className="mx-1 inline-block text-xs" href="/page/privacy/">قوانین
+                        حریم‌خصوصی</ULink>است</p>
+                </div>
+            </UCardBody>
+        </>
+    )
+}
+
+interface PagesLoginSetPasswordProps {
+    onLoginClick: (password: string) => void;
+    loading?: boolean;
+}
+
+const PagesLoginSetPassword = (props: PagesLoginSetPasswordProps) => {
+    const [password, setPassword] = useState('')
+    const [isVisible, setIsVisible] = useState(false);
+
+    const toggleVisibility = () => setIsVisible(!isVisible);
+    return (
+        <>
+            <UCardBody className="text-right">
+                <h1 className="text-2xl mb-8 font-bold">رمز عبور را وارد کنید</h1>
+                <UInput value={password} onValueChange={setPassword} dir="ltr" className="mt-8" variant="bordered"
+                        size="lg" startContent={
+                    <button className="focus:outline-none" type="button" onClick={toggleVisibility}
+                            aria-label="toggle password visibility">
+                        {isVisible ? (
+                            <UIcon icon="solar:eye-outline" className="text-2xl text-default-400 pointer-events-none"/>
+                        ) : (
+                            <UIcon icon="solar:eye-closed-outline"
+                                   className="text-2xl text-default-400 pointer-events-none"/>
+                        )}
+                    </button>
+                }
+                        type={isVisible ? "text" : "password"}/>
+                <UButton className="mt-12" color="primary" isLoading={props.loading}
+                         onClick={() => props.onLoginClick(password)}>
+                    تایید
+                </UButton>
+            </UCardBody>
+        </>
     )
 }
