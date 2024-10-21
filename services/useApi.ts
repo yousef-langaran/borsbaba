@@ -5,8 +5,8 @@ import Cookies from "js-cookie";
 class UseApi {
     constructor() {
         axios.interceptors.request.use(function (config) {
-            config.headers['authorization'] = 'Bearer ' + Cookies.get('auth')
-            config.headers['UniqueId'] = Cookies.get('uniqueId')
+            // config.headers['authorization'] = 'Bearer ' + Cookies.get('auth')
+            // config.headers['UniqueId'] = Cookies.get('uniqueId')
             return config
         })
         axios.interceptors.response.use(function (response) {

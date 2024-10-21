@@ -1,15 +1,14 @@
 import {FiltersProduct} from "@/components/pages/search/filters";
-import {UCard, UCardBody} from "@/components/base/card";
-import {UImage} from "@/components/base/image/image";
 import {useEffect, useState} from "react";
 import api from "@/services/useApi";
 import {useRouter} from "next/router";
-import {GetProductsFilterByUserResultInfo} from "@/services/digimal";
+import {GetFilterItemsAndProductsByUserResult} from "@/services/digimal";
+import {ProductCard} from "@/components/core/product/productCard";
 
 export const PageSearch = () => {
     const router = useRouter()
     const [isLogin, setIsLogin] = useState(false)
-    const [resultProduct, setResultProduct] = useState(null)
+    const [resultProduct, setResultProduct] = useState<GetFilterItemsAndProductsByUserResult | null>(null)
     const fetchProducts = async () => {
         try {
             setIsLogin(true)
@@ -23,9 +22,9 @@ export const PageSearch = () => {
                 pageIndex: 1,
                 pageSize: 25,
                 phrase: '',
-                sortColumnType: router.query?.sort ? router.query?.sort : 0
+                sortColumnType: router.query?.sort ? router.query?.sort : 0 as any
             })
-            const {result}: any = data as GetProductsFilterByUserResultInfo
+            const {result}: any = data as GetFilterItemsAndProductsByUserResult
             setResultProduct(result)
             // products.value = result.productsList.productsInfo
             // totalCount.value = result.productsList.totalCount
@@ -37,9 +36,9 @@ export const PageSearch = () => {
             console.log(e)
         }
     }
-    useEffect(()=>{
+    useEffect(() => {
         fetchProducts()
-    },[])
+    }, [])
     return (
         <div className="flex gap-4">
             <div className="min-w-64">
@@ -47,20 +46,9 @@ export const PageSearch = () => {
             </div>
             <div className="grow">
                 <div className='products-list'>
-                    {resultProduct?.productsList.productsInfo.map((item)=>(
-                            <UCard isPressable>
-                                <UCardBody>
-                                    <UImage
-                                        isZoomed
-                                        alt="NextUI Fruit Image with Zoom"
-                                        src={item?.mediaList?.[0]?.allMedias?.[0]?.url}
-                                        className="aspect-square !w-full !max-w-full bg-blend-multiply"
-                                        classNames={{wrapper: '!w-full !max-w-full'}}
-                                    />
-                                    <h2 className="text-ellipsis line-clamp-2">{item?.persianName}</h2>
-                                </UCardBody>
-                            </UCard>
-                        ))}
+                    {Array.isArray(resultProduct?.productsList?.productsInfo) && resultProduct?.productsList?.productsInfo.map((item) => (
+                        <ProductCard product={item}/>
+                    ))}
                 </div>
             </div>
         </div>
