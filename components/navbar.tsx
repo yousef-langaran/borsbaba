@@ -33,6 +33,8 @@ import React, {useContext, useEffect, useState} from "react";
 import api from "@/services/useApi";
 import {GetMenuResult} from "@/services/digimal";
 import {Profile} from "@/components/pages/layout/profile";
+import {Badge} from "@nextui-org/badge";
+
 export const Navbar = () => {
     const router = useRouter()
     const onLogin = () => {
@@ -40,7 +42,7 @@ export const Navbar = () => {
     }
     const [menu, setMenu] = useState<GetMenuResult[]>([])
 
-    const fetchMenu = async () =>{
+    const fetchMenu = async () => {
         const {data} = await api.MenuApi.apiServicesAppMenuGetAllGet()
         setMenu(data.result)
     }
@@ -84,12 +86,13 @@ export const Navbar = () => {
                 <NavbarContent
                     justify="end"
                 >
+
                     <Profile onLogin={onLogin}/>
-                    <UBadge content="5" color="danger" placement="bottom-right">
-                        <UButton variant="ghost" isIconOnly
+                    <Badge content="5" color="danger" placement="bottom-right">
+                        <Button variant="ghost" isIconOnly
                                  endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
-                        </UButton>
-                    </UBadge>
+                        </Button>
+                    </Badge>
                 </NavbarContent>
             </NextUINavbar>
             <NextUINavbar position="static" isBordered isBlurred={false} key="1" maxWidth="xl">
@@ -106,7 +109,7 @@ export const Navbar = () => {
                         <UPopoverContent className="p-0">
                             <div className="flex">
                                 <UTabs aria-label="Tabs" isVertical color="primary">
-                                    {menu?.map((item)=>(
+                                    {menu?.map((item) => (
                                         <Tab title={item.persianName}/>
                                     ))}
                                 </UTabs>

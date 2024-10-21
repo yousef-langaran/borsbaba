@@ -1,40 +1,69 @@
-import {UButton} from "@/components/base/button/button";
-import React from "react";
+import React, {useEffect, useState} from "react";
+import {Avatar} from "@nextui-org/avatar";
+import {Popover, PopoverContent, PopoverTrigger} from "@nextui-org/popover";
+import {Button} from "@nextui-org/button";
+import Cookie from "js-cookie";
 import {isLogin} from "@/utils/helper";
-import {UAvatar} from "@/components/base/avatar/avatar";
+import {Listbox, ListboxItem} from "@nextui-org/listbox";
 
 interface ProfileProps {
     onLogin: () => void
 }
+
 interface LoginButtonProps {
     onLogin: () => void
 }
+
 interface LoginAvatarProps {
 
 }
-export const Profile = (props:ProfileProps) => {
-    const componentProfile = () =>{
-        if (isLogin()){
+
+export const Profile = (props: ProfileProps) => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        setIsLoggedIn(isLogin());
+    }, []);
+    const componentProfile = () => {
+        if (isLoggedIn) {
             return <LoginAvatar/>
-        }else{
+        } else {
             return <LoginButton onLogin={props.onLogin}/>
         }
     }
     return (
         <>
-        {componentProfile()}
+            {componentProfile()}
         </>
     )
 }
-const LoginButton = (props:LoginButtonProps) => {
+const LoginButton = (props: LoginButtonProps) => {
     return (
-        <UButton variant="bordered" onClick={props.onLogin}>
+        <Button variant="bordered" onClick={props.onLogin}>
             ورود | ثبت نام
-        </UButton>
+        </Button>
     )
 }
-const LoginAvatar = (props:LoginAvatarProps) => {
+const LoginAvatar = (props: LoginAvatarProps) => {
     return (
-        <UAvatar isBordered color="primary" src="https://i.pravatar.cc/150?u=a04258a2462d826712d" />
+        <Popover placement="bottom-start">
+            <PopoverTrigger>
+                <Avatar isBordered radius="lg"/>
+            </PopoverTrigger>
+            <PopoverContent>
+                <div className="w-48">
+                    <Listbox
+                        aria-label="Actions"
+                        onAction={(key) => alert(key)}
+                    >
+                        <ListboxItem key="new">پروفایل</ListboxItem>
+                        <ListboxItem key="copy">پیام ها</ListboxItem>
+                        <ListboxItem  key="delete" className="text-danger" color="danger">
+                            خروج از حساب کاربری
+                        </ListboxItem>
+                    </Listbox>
+                </div>
+            </PopoverContent>
+        </Popover>
     )
 }
