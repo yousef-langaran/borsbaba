@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {Avatar} from "@nextui-org/avatar";
 import {Popover, PopoverContent, PopoverTrigger} from "@nextui-org/popover";
 import {Button} from "@nextui-org/button";
-import Cookie from "js-cookie";
 import {isLogin} from "@/utils/helper";
 import {Listbox, ListboxItem} from "@nextui-org/listbox";
 

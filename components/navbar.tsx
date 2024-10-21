@@ -34,20 +34,20 @@ import api from "@/services/useApi";
 import {GetMenuResult} from "@/services/digimal";
 import {Profile} from "@/components/pages/layout/profile";
 import {Badge} from "@nextui-org/badge";
+import {useSelector, useDispatch} from 'react-redux';
+import {fetchMenu} from "@/redux/reducers/menu";
+import {AppDispatch, RootState} from "@/redux/store";
 
 export const Navbar = () => {
     const router = useRouter()
     const onLogin = () => {
         router.push('auth/login')
     }
-    const [menu, setMenu] = useState<GetMenuResult[]>([])
 
-    const fetchMenu = async () => {
-        const {data} = await api.MenuApi.apiServicesAppMenuGetAllGet()
-        setMenu(data.result)
-    }
+    const dispatch:AppDispatch = useDispatch()
+    const menuItems = useSelector((state:RootState) => state.menu.items)
     useEffect(() => {
-        fetchMenu();
+        dispatch(fetchMenu());
     }, []);
     const searchInput = (
         <UInput
@@ -90,7 +90,7 @@ export const Navbar = () => {
                     <Profile onLogin={onLogin}/>
                     <Badge content="5" color="danger" placement="bottom-right">
                         <Button variant="ghost" isIconOnly
-                                 endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
+                                endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
                         </Button>
                     </Badge>
                 </NavbarContent>
@@ -109,7 +109,7 @@ export const Navbar = () => {
                         <UPopoverContent className="p-0">
                             <div className="flex">
                                 <UTabs aria-label="Tabs" isVertical color="primary">
-                                    {menu?.map((item) => (
+                                    {menuItems?.map((item) => (
                                         <Tab title={item.persianName}/>
                                     ))}
                                 </UTabs>
