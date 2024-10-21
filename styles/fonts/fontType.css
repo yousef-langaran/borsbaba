@@ -81,6 +81,7 @@
 /**end farsi number import font**/
 
 *{
+  text-align: start;
   font-family: "iranyekan", system-ui, sans-serif;
   line-height: 1.5 !important;
 }

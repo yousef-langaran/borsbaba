@@ -3,7 +3,10 @@ import {Accordion, AccordionItem} from "@nextui-org/accordion";
 import {Listbox, ListboxItem} from "@nextui-org/listbox";
 import React from "react";
 
-export const FiltersProduct = () =>{
+interface FiltersProductProps {
+    filters: any
+}
+export const FiltersProduct = (props: FiltersProductProps) =>{
     const [selectedKeys, setSelectedKeys] = React.useState(new Set(["text"]));
 
     const selectedValue = React.useMemo(

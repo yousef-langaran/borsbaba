@@ -86,7 +86,7 @@ export const Navbar = () => {
                 <NavbarContent
                     justify="end"
                 >
-
+                    <ThemeSwitch/>
                     <Profile onLogin={onLogin}/>
                     <Badge content="5" color="danger" placement="bottom-right">
                         <Button variant="ghost" isIconOnly
