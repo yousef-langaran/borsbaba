@@ -3,11 +3,11 @@ import api from "@/services/useApi";
 import {GetMenuResult} from "@/services/digimal";
 
 interface IMenuState {
-    items: GetMenuResult | []
+    items: GetMenuResult[] | []
 }
-export const fetchMenu = createAsyncThunk<GetMenuResult>('menu/get',async ()=>{
+export const fetchMenu = createAsyncThunk<GetMenuResult[]>('menu/get',async ()=>{
     const {data} = await api.MenuApi.apiServicesAppMenuGetAllGet()
-    const {result} = data as GetMenuResult
+    const {result} = data as GetMenuResult[]
     return result
 })
 const initialState: IMenuState = {
@@ -19,7 +19,7 @@ export const menu = createSlice({
     reducers: {},
     extraReducers:(builder)=>{
         builder
-            .addCase(fetchMenu.fulfilled, (state,action: PayloadAction<GetMenuResult>) =>{
+            .addCase(fetchMenu.fulfilled, (state,action: PayloadAction<GetMenuResult[]>) =>{
                 state.items = action.payload
             })
     }
