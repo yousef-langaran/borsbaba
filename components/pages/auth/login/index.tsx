@@ -9,6 +9,9 @@ import api from "@/services/useApi";
 import {motion, AnimatePresence} from "framer-motion"
 import Cookies from "js-cookie";
 import {useRouter} from "next/router";
+import {useDispatch} from "react-redux";
+import {login} from "@/redux/reducers/auth";
+import {AppDispatch} from "@/redux/store";
 
 interface PagesLoginProps {
     children?: ReactNode
@@ -16,6 +19,7 @@ interface PagesLoginProps {
 
 export const PagesLogin = (props: PagesLoginProps) => {
     const router = useRouter()
+    const dispatch: AppDispatch = useDispatch()
     const [isSignInType, setIsSignInType] = useState(0)
     const [username, setUsername] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -29,7 +33,7 @@ export const PagesLogin = (props: PagesLoginProps) => {
             userNameOrEmailAddress: username,
             password: password
         })
-        Cookies.set('token',data.result.accessToken)
+        dispatch(login(data.result.accessToken))
         router.push('/')
         setIsLoading(false)
     }
@@ -73,11 +77,11 @@ export const PagesLogin = (props: PagesLoginProps) => {
                     <AnimatePresence mode="wait">
                         {isSignInType !== null && (
                             <motion.div
-                                key={isSignInType} // استفاده از key برای هماهنگی با AnimatePresence
-                                initial={{ opacity: 0, y: 20 }} // انیمیشن اولیه (محو و کمی پایین)
-                                animate={{ opacity: 1, y: 0 }}  // انیمیشن نهایی (نمایش کامل)
-                                exit={{ opacity: 0, y: -20 }}    // انیمیشن خروج (محو و حرکت به بالا)
-                                transition={{ duration: 0.3 }}   // مدت زمان انیمیشن
+                                key={isSignInType}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.3 }}
                                 layout
                             >
                                 {loginComponent()}
@@ -99,11 +103,11 @@ const PagesLoginSetUser = (props: PagesLoginSetUserProps) => {
     const [username, setUsername] = useState('')
     return (
         <>
-            <UCardBody className="text-right">
+            <UCardBody className="text-right" onKeyDown={(event) => event.key === 'Enter' && props.onLoginClick(username)}>
                 <h1 className="text-2xl mb-8 font-bold">ورود | ثبت نام</h1>
                 <h5 className="text-base">سلام!</h5>
                 <h5 className="text-base">لطفا شماره موبایل یا ایمیل خود را وارد کنید</h5>
-                <UInput value={username} onValueChange={setUsername} dir="ltr" className="mt-12" variant="bordered"
+                <UInput autoFocus value={username} onValueChange={setUsername} dir="ltr" className="mt-12" variant="bordered"
                         size="lg"/>
                 <UButton className="mt-12" color="primary" onClick={() => props.onLoginClick(username)}>
                     ورود
@@ -131,9 +135,9 @@ const PagesLoginSetPassword = (props: PagesLoginSetPasswordProps) => {
     const toggleVisibility = () => setIsVisible(!isVisible);
     return (
         <>
-            <UCardBody className="text-right">
+            <UCardBody className="text-right" onKeyDown={(event) => event.key === 'Enter' && props.onLoginClick(password)}>
                 <h1 className="text-2xl mb-8 font-bold">رمز عبور را وارد کنید</h1>
-                <UInput value={password} onValueChange={setPassword} dir="ltr" className="mt-8" variant="bordered"
+                <UInput autoFocus value={password} onValueChange={setPassword} dir="ltr" className="mt-8" variant="bordered"
                         size="lg" startContent={
                     <button className="focus:outline-none" type="button" onClick={toggleVisibility}
                             aria-label="toggle password visibility">

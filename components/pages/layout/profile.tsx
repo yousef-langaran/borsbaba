@@ -1,9 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {Avatar} from "@nextui-org/avatar";
 import {Popover, PopoverContent, PopoverTrigger} from "@nextui-org/popover";
 import {Button} from "@nextui-org/button";
-import {isLogin} from "@/utils/helper";
 import {Listbox, ListboxItem} from "@nextui-org/listbox";
+import {AppDispatch, RootState} from "@/redux/store";
+import {useDispatch, useSelector} from "react-redux";
+import {logout} from "@/redux/reducers/auth";
 
 interface ProfileProps {
     onLogin: () => void
@@ -18,15 +20,12 @@ interface LoginAvatarProps {
 }
 
 export const Profile = (props: ProfileProps) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        setIsLoggedIn(isLogin());
-    }, []);
+    const token = useSelector((state: RootState) => state.auth.token)
     const componentProfile = () => {
-        if (isLoggedIn) {
+        if (token) {
             return <LoginAvatar/>
-        } else {
+        }
+        else {
             return <LoginButton onLogin={props.onLogin}/>
         }
     }
@@ -44,6 +43,7 @@ const LoginButton = (props: LoginButtonProps) => {
     )
 }
 const LoginAvatar = (props: LoginAvatarProps) => {
+    const dispatch: AppDispatch = useDispatch()
     return (
         <Popover placement="bottom-start">
             <PopoverTrigger>
@@ -53,11 +53,10 @@ const LoginAvatar = (props: LoginAvatarProps) => {
                 <div className="w-48">
                     <Listbox
                         aria-label="Actions"
-                        onAction={(key) => alert(key)}
                     >
-                        <ListboxItem key="new">پروفایل</ListboxItem>
-                        <ListboxItem key="copy">پیام ها</ListboxItem>
-                        <ListboxItem  key="delete" className="text-danger" color="danger">
+                        <ListboxItem key="profile">پروفایل</ListboxItem>
+                        <ListboxItem key="message">پیام ها</ListboxItem>
+                        <ListboxItem  key="logout" className="text-danger" color="danger" onClick={()=>dispatch(logout())}>
                             خروج از حساب کاربری
                         </ListboxItem>
                     </Listbox>

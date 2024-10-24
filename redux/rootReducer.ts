@@ -1,8 +1,10 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import counterReducer from './reducers/menu';
+import menu from './reducers/menu';
+import auth from './reducers/auth';
 
 const rootReducer = combineReducers({
-    menu: counterReducer,
+    menu: menu,
+    auth: auth,
 });
 
 export default rootReducer;

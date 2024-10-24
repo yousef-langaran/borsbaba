@@ -3,18 +3,25 @@ import { Link } from "@nextui-org/link";
 import { Head } from "./head";
 
 import { Navbar } from "@/components/navbar";
-import React from "react";
+import React, {useEffect, useState} from "react";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "@/redux/store";
+import {checkToken} from "@/redux/reducers/auth";
 
 export default function DefaultLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+    const dispatch: AppDispatch = useDispatch()
+    useEffect(()=>{
+        dispatch(checkToken())
+    },[])
   return (
     <div className="relative flex flex-col h-screen">
       <Head />
       <Navbar />
-      <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
+      <main className="container mx-auto max-w-7xl px-6 flex-grow pt-32">
         {children}
       </main>
       <footer className="w-full flex items-center justify-center py-3">
