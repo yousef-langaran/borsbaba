@@ -44,11 +44,35 @@ export const Navbar = () => {
         router.push('auth/login')
     }
 
-    const dispatch:AppDispatch = useDispatch()
-    const menuItems = useSelector((state:RootState) => state.menu.items)
+    const dispatch: AppDispatch = useDispatch()
+    const menuItems = useSelector((state: RootState) => state.menu.items)
     useEffect(() => {
         dispatch(fetchMenu());
     }, []);
+
+    const [scrollDirection, setScrollDirection] = useState(null);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    const handleScroll = () => {
+        const currentScrollY = window.scrollY;
+
+        if (currentScrollY > lastScrollY) {
+            setScrollDirection('down');
+        } else if (currentScrollY < lastScrollY) {
+            setScrollDirection('up');
+        }
+
+        setLastScrollY(currentScrollY);
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [lastScrollY]);
+
     const searchInput = (
         <UInput
             aria-label="جستجو"
@@ -70,33 +94,34 @@ export const Navbar = () => {
             type="search"
         />
     );
-    const [selected, setSelected] = React.useState("login");
     return (
-        <>
-            <NextUINavbar position="static" isBlurred={false} key="1" maxWidth="xl">
-                <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-                    <NavbarBrand className="gap-3 max-w-fit">
-                        <NextLink className="flex justify-start items-center gap-1" href="/">
-                            <Logo/>
-                            <p className="font-bold text-inherit">پرومال</p>
-                        </NextLink>
-                    </NavbarBrand>
-                    <NavbarItem className="lg:flex">{searchInput}</NavbarItem>
-                </NavbarContent>
-                <NavbarContent
-                    justify="end"
-                >
-                    <ThemeSwitch/>
-                    <Profile onLogin={onLogin}/>
-                    <Badge content="5" color="danger" placement="bottom-right">
-                        <Button variant="ghost" isIconOnly
-                                endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
-                        </Button>
-                    </Badge>
-                </NavbarContent>
+        <nav className='sticky top-0 shadow z-50' >
+            <NextUINavbar className='z-50 bg-white' position='sticky' maxWidth="2xl">
+                    <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
+                        <NavbarBrand className="gap-3 max-w-fit">
+                            <NextLink className="flex justify-start items-center gap-1" href="/">
+                                <Logo/>
+                                <p className="font-bold text-inherit">پرومال</p>
+                            </NextLink>
+                        </NavbarBrand>
+                        <NavbarItem className="lg:flex">{searchInput}</NavbarItem>
+                    </NavbarContent>
+                    <NavbarContent
+                        justify="end"
+                    >
+                        <NavbarItem className="flex gap-4">
+                            <ThemeSwitch/>
+                            <Profile onLogin={onLogin}/>
+                            <Badge content="5" color="danger" placement="bottom-right">
+                                <Button variant="ghost" isIconOnly
+                                        endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
+                                </Button>
+                            </Badge>
+                        </NavbarItem>
+                    </NavbarContent>
             </NextUINavbar>
-            <NextUINavbar position="static" isBordered isBlurred={false} key="1" maxWidth="xl">
-                <NavbarContent justify="start">
+            <NextUINavbar isBordered className={[scrollDirection === 'down' ? '-translate-y-full' : 'h-16','transition-all overflow-hidden absolute top-16 bg-white']} maxWidth="2xl">
+                <NavbarContent justify='start'>
                     <UPopover
                         backdrop="blur"
                         placement="bottom"
@@ -109,8 +134,8 @@ export const Navbar = () => {
                         <UPopoverContent className="p-0">
                             <div className="flex">
                                 <UTabs aria-label="Tabs" isVertical color="primary">
-                                    {menuItems?.map((item) => (
-                                        <Tab title={item.persianName}/>
+                                    {menuItems?.map((item,index) => (
+                                        <Tab key={`menuTab-${index}`} title={item.persianName}/>
                                     ))}
                                 </UTabs>
                                 <div className="p-2">
@@ -121,6 +146,6 @@ export const Navbar = () => {
                     </UPopover>
                 </NavbarContent>
             </NextUINavbar>
-        </>
+        </nav>
     );
 };

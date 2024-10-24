@@ -46,8 +46,8 @@ export const PageSearch = () => {
             </div>
             <div className="grow">
                 <div className='products-list'>
-                    {Array.isArray(resultProduct?.productsList?.productsInfo) && resultProduct?.productsList?.productsInfo.map((item) => (
-                        <ProductCard product={item}/>
+                    {Array.isArray(resultProduct?.productsList?.productsInfo) && resultProduct?.productsList?.productsInfo.map((item,index) => (
+                        <ProductCard key={`product-${index}`} product={item}/>
                     ))}
                 </div>
             </div>
