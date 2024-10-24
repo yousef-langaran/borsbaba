@@ -21,7 +21,7 @@ export const PageSearch = () => {
                 minPrice: 0,
                 pageIndex: 1,
                 pageSize: 25,
-                phrase: '',
+                phrase: router.query?.q || '',
                 sortColumnType: router.query?.sort ? router.query?.sort : 0 as any
             })
             const {result}: any = data as GetFilterItemsAndProductsByUserResult
@@ -33,12 +33,11 @@ export const PageSearch = () => {
             setIsLogin(false)
         } catch (e) {
             setIsLogin(false)
-            console.log(e)
         }
     }
     useEffect(() => {
         fetchProducts()
-    }, [])
+    }, [router.query])
     return (
         <div className="flex gap-4">
             <div className="min-w-64">

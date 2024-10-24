@@ -1,37 +1,25 @@
 import {
     Navbar as NextUINavbar,
     NavbarContent,
-    NavbarMenu,
     NavbarBrand,
     NavbarItem,
-    NavbarMenuItem,
 } from "@nextui-org/navbar";
 import {Button} from "@nextui-org/button";
 import {Kbd} from "@nextui-org/kbd";
-import {Input} from "@nextui-org/input";
 import NextLink from "next/link";
 import {useRouter} from 'next/router'
 
-import {siteConfig} from "@/config/site";
 import {ThemeSwitch} from "@/components/theme-switch";
 import {
-    TwitterIcon,
-    GithubIcon,
-    DiscordIcon,
-    HeartFilledIcon,
     SearchIcon,
     Logo,
 } from "@/components/icons";
 import {UInput} from "@/components/base/input";
-import {UButton} from "@/components/base/button/button";
 import {UIcon} from "@/components/base/icon";
-import {UBadge} from "@/components/base/badge/button";
 import {UPopover, UPopoverContent, UPopoverTrigger} from "@/components/base/popover";
-import {UTab, UTabs} from "@/components/base/tabs/tabs";
-import {Tab, Tabs} from "@nextui-org/tabs";
-import React, {useContext, useEffect, useState} from "react";
-import api from "@/services/useApi";
-import {GetMenuResult} from "@/services/digimal";
+import {UTabs} from "@/components/base/tabs/tabs";
+import {Tab} from "@nextui-org/tabs";
+import React, {useEffect, useState} from "react";
 import {Profile} from "@/components/pages/layout/profile";
 import {Badge} from "@nextui-org/badge";
 import {useSelector, useDispatch} from 'react-redux';
@@ -40,6 +28,7 @@ import {AppDispatch, RootState} from "@/redux/store";
 
 export const Navbar = () => {
     const router = useRouter()
+    const [phrase, setPhrase] = useState('')
     const onLogin = () => {
         router.push('auth/login')
     }
@@ -50,7 +39,7 @@ export const Navbar = () => {
         dispatch(fetchMenu());
     }, []);
 
-    const [scrollDirection, setScrollDirection] = useState(null);
+    const [scrollDirection, setScrollDirection] = useState<string | null>(null);
     const [lastScrollY, setLastScrollY] = useState(0);
 
     const handleScroll = () => {
@@ -72,7 +61,11 @@ export const Navbar = () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, [lastScrollY]);
-
+    const onGoSearchPage = (event) =>{
+        if (event.key === 'Enter'){
+            router.push({pathname: 'search',query:{q: phrase}})
+        }
+    }
     const searchInput = (
         <UInput
             aria-label="جستجو"
@@ -80,11 +73,13 @@ export const Navbar = () => {
                 inputWrapper: "bg-default-100 w-96",
                 input: "text-sm",
             }}
+            onKeyDown={onGoSearchPage}
             endContent={
                 <Kbd className="hidden lg:inline-block" keys={["command"]}>
                     K
                 </Kbd>
             }
+            onValueChange={setPhrase}
             labelPlacement="outside"
             placeholder="محصول مورد نظر را جستحو کنید"
             startContent={
