@@ -4,6 +4,9 @@ import {Popover, PopoverContent, PopoverTrigger} from "@nextui-org/popover";
 import {Button} from "@nextui-org/button";
 import {isLogin} from "@/utils/helper";
 import {Listbox, ListboxItem} from "@nextui-org/listbox";
+import Cookies from "js-cookie";
+import {AppDispatch, RootState} from "@/redux/store";
+import {useDispatch, useSelector} from "react-redux";
 
 interface ProfileProps {
     onLogin: () => void
@@ -18,13 +21,9 @@ interface LoginAvatarProps {
 }
 
 export const Profile = (props: ProfileProps) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-    useEffect(() => {
-        setIsLoggedIn(isLogin());
-    }, []);
+    const token = useSelector((state: RootState) => state.auth.token)
     const componentProfile = () => {
-        if (isLoggedIn) {
+        if (token) {
             return <LoginAvatar/>
         } else {
             return <LoginButton onLogin={props.onLogin}/>
@@ -53,11 +52,10 @@ const LoginAvatar = (props: LoginAvatarProps) => {
                 <div className="w-48">
                     <Listbox
                         aria-label="Actions"
-                        onAction={(key) => alert(key)}
                     >
                         <ListboxItem key="new">پروفایل</ListboxItem>
                         <ListboxItem key="copy">پیام ها</ListboxItem>
-                        <ListboxItem  key="delete" className="text-danger" color="danger">
+                        <ListboxItem  key="delete" className="text-danger" color="danger" onClick={()=> Cookies.remove('token')}>
                             خروج از حساب کاربری
                         </ListboxItem>
                     </Listbox>

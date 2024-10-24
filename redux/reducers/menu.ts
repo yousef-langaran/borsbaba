@@ -7,7 +7,7 @@ interface IMenuState {
 }
 export const fetchMenu = createAsyncThunk<GetMenuResult[]>('menu/get',async ()=>{
     const {data} = await api.MenuApi.apiServicesAppMenuGetAllGet()
-    const {result} = data as GetMenuResult[]
+    const {result}: any = data as GetMenuResult[]
     return result
 })
 const initialState: IMenuState = {
