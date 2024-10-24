@@ -13,15 +13,15 @@ export const PageSearch = () => {
         try {
             setIsLogin(true)
             const {data} = await api.ProductApi.apiServicesAppProductFilterByUserPost({
-                brandIds: router.query?.brand ? router.query?.brand?.split(',') : [],
-                productTypeIds: router.query?.productType ? router.query?.productType?.split(',') : [],
+                brandIds: router.query?.brandIds ? router.query?.brandIds?.split(',') : [],
+                productTypeIds: router.query?.productTypeIds ? router.query?.productTypeIds?.split(',') : [],
                 propertyIds: [],
                 specificationIds: router.query?.specificationIds ? router.query?.specificationIds?.split(',') : [],
-                maxPrice: 999999999,
-                minPrice: 0,
+                maxPrice: router.query?.maxPrice ? +router.query?.maxPrice : undefined,
+                minPrice: router.query?.minPrice ? +router.query?.minPrice : undefined,
                 pageIndex: 1,
                 pageSize: 25,
-                phrase: router.query?.q || '',
+                phrase: router.query?.q ? router.query?.q.toString() : undefined,
                 sortColumnType: router.query?.sort ? router.query?.sort : 0 as any
             })
             const {result}: any = data as GetFilterItemsAndProductsByUserResult
@@ -45,7 +45,7 @@ export const PageSearch = () => {
             </div>
             <div className="grow">
                 <div className='products-list'>
-                    {Array.isArray(resultProduct?.productsList?.productsInfo) && resultProduct?.productsList?.productsInfo.map((item,index) => (
+                    {Array.isArray(resultProduct?.productsList?.productsInfo) && resultProduct?.productsList?.productsInfo.map((item, index) => (
                         <ProductCard key={`product-${index}`} product={item}/>
                     ))}
                 </div>
