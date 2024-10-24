@@ -96,7 +96,7 @@ export const Navbar = () => {
     );
     return (
         <nav className='sticky top-0 shadow z-50' >
-            <NextUINavbar className='z-50 bg-white' position='sticky' maxWidth="2xl">
+            <NextUINavbar className='z-50 bg-content1' position='sticky' maxWidth="2xl">
                     <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
                         <NavbarBrand className="gap-3 max-w-fit">
                             <NextLink className="flex justify-start items-center gap-1" href="/">
@@ -120,7 +120,7 @@ export const Navbar = () => {
                         </NavbarItem>
                     </NavbarContent>
             </NextUINavbar>
-            <NextUINavbar isBordered className={[scrollDirection === 'down' ? '-translate-y-full' : 'h-16','transition-all overflow-hidden absolute top-16 bg-white']} maxWidth="2xl">
+            <NextUINavbar isBordered className={[scrollDirection === 'down' ? '-translate-y-full' : 'h-16','transition-all overflow-hidden absolute top-16 bg-content1']} maxWidth="2xl">
                 <NavbarContent justify='start'>
                     <UPopover
                         backdrop="blur"
