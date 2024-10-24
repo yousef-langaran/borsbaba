@@ -1,12 +1,11 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {Avatar} from "@nextui-org/avatar";
 import {Popover, PopoverContent, PopoverTrigger} from "@nextui-org/popover";
 import {Button} from "@nextui-org/button";
-import {isLogin} from "@/utils/helper";
 import {Listbox, ListboxItem} from "@nextui-org/listbox";
-import Cookies from "js-cookie";
 import {AppDispatch, RootState} from "@/redux/store";
 import {useDispatch, useSelector} from "react-redux";
+import {logout} from "@/redux/reducers/auth";
 
 interface ProfileProps {
     onLogin: () => void
@@ -25,7 +24,8 @@ export const Profile = (props: ProfileProps) => {
     const componentProfile = () => {
         if (token) {
             return <LoginAvatar/>
-        } else {
+        }
+        else {
             return <LoginButton onLogin={props.onLogin}/>
         }
     }
@@ -43,6 +43,7 @@ const LoginButton = (props: LoginButtonProps) => {
     )
 }
 const LoginAvatar = (props: LoginAvatarProps) => {
+    const dispatch: AppDispatch = useDispatch()
     return (
         <Popover placement="bottom-start">
             <PopoverTrigger>
@@ -53,9 +54,9 @@ const LoginAvatar = (props: LoginAvatarProps) => {
                     <Listbox
                         aria-label="Actions"
                     >
-                        <ListboxItem key="new">پروفایل</ListboxItem>
-                        <ListboxItem key="copy">پیام ها</ListboxItem>
-                        <ListboxItem  key="delete" className="text-danger" color="danger" onClick={()=> Cookies.remove('token')}>
+                        <ListboxItem key="profile">پروفایل</ListboxItem>
+                        <ListboxItem key="message">پیام ها</ListboxItem>
+                        <ListboxItem  key="logout" className="text-danger" color="danger" onClick={()=>dispatch(logout())}>
                             خروج از حساب کاربری
                         </ListboxItem>
                     </Listbox>

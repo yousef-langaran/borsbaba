@@ -9,6 +9,9 @@ import api from "@/services/useApi";
 import {motion, AnimatePresence} from "framer-motion"
 import Cookies from "js-cookie";
 import {useRouter} from "next/router";
+import {useDispatch} from "react-redux";
+import {login} from "@/redux/reducers/auth";
+import {AppDispatch} from "@/redux/store";
 
 interface PagesLoginProps {
     children?: ReactNode
@@ -16,6 +19,7 @@ interface PagesLoginProps {
 
 export const PagesLogin = (props: PagesLoginProps) => {
     const router = useRouter()
+    const dispatch: AppDispatch = useDispatch()
     const [isSignInType, setIsSignInType] = useState(0)
     const [username, setUsername] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -29,7 +33,7 @@ export const PagesLogin = (props: PagesLoginProps) => {
             userNameOrEmailAddress: username,
             password: password
         })
-        Cookies.set('token',data.result.accessToken)
+        dispatch(login(data.result.accessToken))
         router.push('/')
         setIsLoading(false)
     }

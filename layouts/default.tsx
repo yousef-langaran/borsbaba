@@ -3,13 +3,20 @@ import { Link } from "@nextui-org/link";
 import { Head } from "./head";
 
 import { Navbar } from "@/components/navbar";
-import React from "react";
+import React, {useEffect, useState} from "react";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "@/redux/store";
+import {checkToken} from "@/redux/reducers/auth";
 
 export default function DefaultLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+    const dispatch: AppDispatch = useDispatch()
+    useEffect(()=>{
+        dispatch(checkToken())
+    },[])
   return (
     <div className="relative flex flex-col h-screen">
       <Head />

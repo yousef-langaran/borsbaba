@@ -2,7 +2,7 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 
 interface IAuthState {
-    token: string | null
+    token: string | null | undefined
 }
 
 const initialState: IAuthState = {
