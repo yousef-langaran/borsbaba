@@ -1,7 +1,7 @@
 import {UCard, UCardBody, UCardHeader} from "@/components/base/card";
 import {Accordion, AccordionItem} from "@nextui-org/accordion";
 import {Listbox, ListboxItem} from "@nextui-org/listbox";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import _ from "lodash";
 import {Checkbox, Slider} from "@nextui-org/react";
 import {useRouter} from "next/router";
@@ -26,20 +26,20 @@ export const FiltersProduct = (props: FiltersProductProps) =>{
         if (props.filters?.brands) {
             setAccordion((prevState)=> [...prevState,{
                 label: 'برند ها',
-                component: <BrandFilter items={props.filters?.brands} queryKey='brandIds'/>,
+                component: <BrandFilter items={props.filters?.brands} queryKey='brandIds' selectionMode='multiple'/>,
             }])
         }
         if (props.filters?.productTypes) {
             setAccordion((prevState)=>[...prevState,{
                 label: 'دسته بندی ها',
-                component: <BrandFilter items={props.filters?.productTypes} queryKey='propertyIds'/>,
+                component: <BrandFilter items={props.filters?.productTypes} queryKey='productTypeIds' selectionMode='single'/>,
             }])
         }
         const groupSpec = _.groupBy(props.filters?.specifications,'title')
         Object.keys(groupSpec).map((i,index)=>{
             setAccordion((prevState)=>[...prevState,{
                 label: i,
-                component: <BrandFilter items={props.filters?.brands} queryKey='specificationIds'/>,
+                component: <SpecificationFilter items={groupSpec[i]} queryKey='specificationIds' selectionMode='multiple'/>,
             }])
         })
     }
@@ -64,15 +64,16 @@ export const FiltersProduct = (props: FiltersProductProps) =>{
 
 interface BrandFilterProps {
     items:any[],
-    queryKey?: string
+    queryKey?: string,
+    selectionMode?: 'single' | 'multiple'
 }
 const BrandFilter = (props:BrandFilterProps) =>{
     const router = useRouter()
-    const [selectedKeys, setSelectedKeys] = React.useState([router.query?.[props.queryKey || ''] || '']);
+    const [selectedKeys, setSelectedKeys] = React.useState(router.query?.[props.queryKey || '']?.split(',')||[]);
 
     const selectedValue = React.useMemo(
         () => {
-            const values = Array.from(selectedKeys).join(", ")
+            const values = Array.from(selectedKeys).join(",")
             if (props.queryKey){
                 router.replace({
                     query:{
@@ -90,8 +91,7 @@ const BrandFilter = (props:BrandFilterProps) =>{
             className="text-justify"
             aria-label="Single selection example"
             variant="flat"
-            disallowEmptySelection
-            selectionMode="single"
+            selectionMode={props.selectionMode}
             selectedKeys={selectedKeys}
             onSelectionChange={setSelectedKeys}
         >
@@ -101,7 +101,7 @@ const BrandFilter = (props:BrandFilterProps) =>{
                         selectedIcon: 'w-3 h-[1.1875rem]'
                     }}
                     selectedIcon={
-                    <Checkbox className='p-0' isSelected={selectedValue == item.id}/>
+                    <Checkbox className='p-0' isSelected={Array.from(selectedKeys).includes(item.id.toString())}/>
                 }
                     key={item.id} >{item.persianName}</ListboxItem>
             ))}
@@ -137,5 +137,70 @@ const PriceFilter = (props: PriceFilterProps) =>{
             onChange={setPrice}
             onChangeEnd={onChangeEndPrice}
         />
+    )
+}
+
+interface SpecificationFilterProps {
+    items:any[],
+    queryKey?: string,
+    selectionMode?: 'single' | 'multiple'
+}
+const SpecificationFilter = (props:SpecificationFilterProps) =>{
+    const router = useRouter()
+    //set first value
+    useEffect(() => {
+        if (!router.isReady || !router.query?.specificationIds || !props.items) return [];
+
+        const spec = router.query.specificationIds.split(',');
+        const values = spec.reduce((selected: any[], id: string) => {
+            const findItem = props.items.find((item: any) => +item?.id === +id);
+            if (findItem) {
+                selected.push(findItem);
+            }
+            return selected;
+        }, []);
+        setSelectedKeys(values.map(i => i.id))
+    }, [router.isReady, router.query?.specificationIds, props.items]);
+    const [selectedKeys, setSelectedKeys] = React.useState([]);
+
+    const selectedValue = React.useMemo(
+        () => {
+            const values = Array.from(selectedKeys).join(", ")
+            return values
+        },
+        [selectedKeys]
+    );
+    useEffect(() => {
+        const specs = router.query.specificationIds.split(',')
+        const mergedArray = [...specs, ...Array.from(selectedKeys)].reduce((acc, current) => {
+            const x = acc.find(item => item == current);
+            if (!x) {
+                return acc.concat([current]);
+            } else {
+                return acc;
+            }
+        }, []);
+        router.replace({query: {...router.query, specificationIds: mergedArray.join(',')}})
+    }, [selectedKeys]);
+    return(
+        <Listbox
+            className="text-justify"
+            aria-label="Single selection example"
+            variant="flat"
+            selectionMode='multiple'
+            selectedKeys={selectedKeys}
+            onSelectionChange={setSelectedKeys}
+        >
+            {props.items.map((item) =>(
+                <ListboxItem
+                    classNames={{
+                        selectedIcon: 'w-3 h-[1.1875rem]'
+                    }}
+                    selectedIcon={
+                        <Checkbox className='p-0' isSelected={Array.from(selectedKeys).includes(item.id.toString())}/>
+                    }
+                    key={item.id}>{item.value}</ListboxItem>
+            ))}
+        </Listbox>
     )
 }

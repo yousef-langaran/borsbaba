@@ -36,8 +36,9 @@ export const PageSearch = () => {
         }
     }
     useEffect(() => {
+        if (!router.isReady) return;
         fetchProducts()
-    }, [router.query])
+    }, [router.isReady, JSON.stringify(router.query)])
     return (
         <div className="flex gap-4">
             <div className="min-w-64">
