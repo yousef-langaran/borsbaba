@@ -4,14 +4,14 @@ import api from "@/services/useApi";
 import {useRouter} from "next/router";
 import {GetFilterItemsAndProductsByUserResult} from "@/services/digimal";
 import {ProductCard} from "@/components/core/product/productCard";
+import {UTabs} from "@/components/base/tabs/tabs";
+import {Tab, Tabs} from "@nextui-org/tabs";
 
 export const PageSearch = () => {
     const router = useRouter()
-    const [isLogin, setIsLogin] = useState(false)
     const [resultProduct, setResultProduct] = useState<GetFilterItemsAndProductsByUserResult | null>(null)
     const fetchProducts = async () => {
         try {
-            setIsLogin(true)
             const {data} = await api.ProductApi.apiServicesAppProductFilterByUserPost({
                 brandIds: router.query?.brandIds ? router.query?.brandIds?.split(',') : [],
                 productTypeIds: router.query?.productTypeIds ? router.query?.productTypeIds?.split(',') : [],
@@ -30,9 +30,8 @@ export const PageSearch = () => {
             // totalCount.value = result.productsList.totalCount
             // filters.value = result.filters
             // sorts.value = result.sorts
-            setIsLogin(false)
         } catch (e) {
-            setIsLogin(false)
+            console.error(e)
         }
     }
     useEffect(() => {
@@ -45,6 +44,15 @@ export const PageSearch = () => {
                 <FiltersProduct filters={resultProduct?.filters}/>
             </div>
             <div className="grow">
+                <div className='flex justify-between items-center mb-4'>
+                    <Tabs size='sm'>
+                        { resultProduct?.sorts?.map((item,index)=>(
+                            <Tab key={`sorts-${item.value}`} title={item.persianTitle}/>
+                        ))
+                        }
+                    </Tabs>
+                    <p className='text-xs'>{resultProduct?.productsList?.totalCount} کالا</p>
+                </div>
                 <div className='products-list'>
                     {Array.isArray(resultProduct?.productsList?.productsInfo) && resultProduct?.productsList?.productsInfo.map((item, index) => (
                         <ProductCard key={`product-${index}`} product={item}/>
