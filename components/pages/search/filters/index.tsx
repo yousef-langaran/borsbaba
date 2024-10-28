@@ -6,6 +6,7 @@ import _ from "lodash";
 import {Checkbox, Slider} from "@nextui-org/react";
 import {useRouter} from "next/router";
 
+
 interface FiltersProductProps {
     filters: any
 }
@@ -61,7 +62,6 @@ export const FiltersProduct = (props: FiltersProductProps) =>{
         </UCard>
     )
 }
-
 interface BrandFilterProps {
     items:any[],
     queryKey?: string,
@@ -139,7 +139,6 @@ const PriceFilter = (props: PriceFilterProps) =>{
         />
     )
 }
-
 interface SpecificationFilterProps {
     items:any[],
     queryKey?: string,
