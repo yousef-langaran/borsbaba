@@ -29,7 +29,7 @@ export const PagesLogin = (props: PagesLoginProps) => {
     }
     const onLogin = async (password: string) => {
         setIsLoading(true)
-        const {data} = await api.TokenAuthApi.apiTokenAuthAuthenticatePost({
+        const {data} :any = await api.TokenAuthApi.apiTokenAuthAuthenticatePost({
             userNameOrEmailAddress: username,
             password: password
         })

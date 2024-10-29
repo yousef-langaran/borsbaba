@@ -42,7 +42,8 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
   // Prevent Hydration Mismatch
   if (!isMounted) return <div className="w-6 h-6" />;
 
-  return (
+    return (
+        // @ts-ignore
     <Component
       aria-label={isSelected ? "Switch to dark mode" : "Switch to light mode"}
       {...getBaseProps({

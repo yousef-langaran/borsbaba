@@ -4,10 +4,9 @@ import {Popover, PopoverTrigger, PopoverContent} from "@nextui-org/popover";
 import {PopoverTriggerProps} from "@nextui-org/popover/dist/popover-trigger";
 import {PopoverContentProps} from "@nextui-org/react";
 
-export const UPopover = ({children,...props}: UsePopoverProps) => (
-    <Popover
-        {...props}>
-        {children}
+export const UPopover = ({ children, ...props }: UsePopoverProps) => (
+    <Popover {...props}>
+        {Array.isArray(children) ? children : [children]}
     </Popover>
 );
 export const UPopoverTrigger = ({children,...props}: PopoverTriggerProps) => (

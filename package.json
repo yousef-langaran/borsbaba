@@ -9,6 +9,9 @@
 		"lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
 	},
 	"dependencies": {
+		"@capacitor/android": "^6.1.2",
+		"@capacitor/cli": "^6.1.2",
+		"@capacitor/core": "^6.1.2",
 		"@nextui-org/button": "2.0.38",
 		"@nextui-org/code": "2.0.33",
 		"@nextui-org/input": "2.2.5",
@@ -33,6 +36,7 @@
 		"lodash": "^4.17.21",
 		"next": "14.2.4",
 		"next-themes": "^0.2.1",
+		"npx": "^10.2.2",
 		"react": "18.3.1",
 		"react-dom": "18.3.1",
 		"react-redux": "^9.1.2"
@@ -40,8 +44,8 @@
 	"devDependencies": {
 		"@iconify/react": "^5.0.2",
 		"@types/node": "20.5.7",
-		"@types/react": "18.3.3",
-		"@types/react-dom": "18.3.0",
+		"@types/react": "^18.3.12",
+		"@types/react-dom": "^18.3.1",
 		"@typescript-eslint/eslint-plugin": "7.2.0",
 		"@typescript-eslint/parser": "7.2.0",
 		"autoprefixer": "10.4.19",

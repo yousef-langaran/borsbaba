@@ -13,10 +13,10 @@ export const PageSearch = () => {
     const fetchProducts = async () => {
         try {
             const {data} = await api.ProductApi.apiServicesAppProductFilterByUserPost({
-                brandIds: router.query?.brandIds ? router.query?.brandIds?.split(',') : [],
-                productTypeIds: router.query?.productTypeIds ? router.query?.productTypeIds?.split(',') : [],
+                brandIds: typeof router.query.brandIds === 'string' ? router.query.brandIds.split(',').map(Number) : [],
+                productTypeIds: typeof router.query?.productTypeIds === 'string' ? router.query?.productTypeIds?.split(',').map(Number) : [],
                 propertyIds: [],
-                specificationIds: router.query?.specificationIds ? router.query?.specificationIds?.split(',') : [],
+                specificationIds: typeof router.query?.specificationIds === 'string' ? router.query?.specificationIds?.split(',').map(Number) : [],
                 maxPrice: router.query?.maxPrice ? +router.query?.maxPrice : undefined,
                 minPrice: router.query?.minPrice ? +router.query?.minPrice : undefined,
                 pageIndex: 1,

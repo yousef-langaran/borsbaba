@@ -61,7 +61,7 @@ export const Navbar = () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, [lastScrollY]);
-    const onGoSearchPage = (event) =>{
+    const onGoSearchPage = (event:any) =>{
         if (event.key === 'Enter'){
             router.push({pathname: 'search',query:{q: phrase}})
         }
@@ -115,7 +115,10 @@ export const Navbar = () => {
                         </NavbarItem>
                     </NavbarContent>
             </NextUINavbar>
-            <NextUINavbar isBordered className={[scrollDirection === 'down' ? '-translate-y-full' : 'h-16','transition-all overflow-hidden absolute top-16 bg-content1']} maxWidth="2xl">
+            <NextUINavbar isBordered className={[
+                scrollDirection === 'down' ? '-translate-y-full' : 'h-16',
+                'transition-all overflow-hidden absolute top-16 bg-content1'
+            ].join(' ')} maxWidth="2xl">
                 <NavbarContent justify='start'>
                     <UPopover
                         backdrop="blur"

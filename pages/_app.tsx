@@ -17,7 +17,10 @@ export default function App({Component, pageProps}: AppProps) {
         <NextUIProvider navigate={router.push}>
             <NextThemesProvider>
                 <Provider store={store}>
-                    <Component {...pageProps} />
+                    {
+                        // @ts-ignore
+                        <Component {...pageProps} />
+                    }
                 </Provider>
             </NextThemesProvider>
         </NextUIProvider>
