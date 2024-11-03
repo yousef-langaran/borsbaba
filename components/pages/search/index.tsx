@@ -40,11 +40,11 @@ export const PageSearch = () => {
     }, [router.isReady, JSON.stringify(router.query)])
     return (
         <div className="flex gap-4">
-            <div className="min-w-64">
+            <div className="min-w-64 hidden md:block">
                 <FiltersProduct filters={resultProduct?.filters}/>
             </div>
             <div className="grow">
-                <div className='flex justify-between items-center mb-4'>
+                <div className='justify-between items-center mb-4 hidden md:flex'>
                     <Tabs size='sm'>
                         { resultProduct?.sorts?.map((item,index)=>(
                             <Tab key={`sorts-${item.value}`} title={item.persianTitle}/>
