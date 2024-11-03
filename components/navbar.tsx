@@ -25,7 +25,32 @@ import {Badge} from "@nextui-org/badge";
 import {useSelector, useDispatch} from 'react-redux';
 import {fetchMenu} from "@/redux/reducers/menu";
 import {AppDispatch, RootState} from "@/redux/store";
+import {UCard, UCardBody} from "@/components/base/card";
+import {UButton} from "@/components/base/button/button";
+import {Icon} from "@iconify/react";
 
+const bottomNav = [
+    {
+        icon: 'hugeicons:home-03',
+        label: 'خانه',
+        route: '/'
+    },
+    {
+        icon: 'hugeicons:dashboard-square-01',
+        label: 'دسته بندی ها',
+        route: '/categories'
+    },
+    {
+        icon: 'hugeicons:shopping-basket-03',
+        label: 'سبد خرید',
+        route: '/basket'
+    },
+    {
+        icon: 'hugeicons:user',
+        label: 'پروفایل',
+        route: '/profile'
+    },
+]
 export const Navbar = () => {
     const router = useRouter()
     const [phrase, setPhrase] = useState('')
@@ -61,9 +86,9 @@ export const Navbar = () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, [lastScrollY]);
-    const onGoSearchPage = (event:any) =>{
-        if (event.key === 'Enter'){
-            router.push({pathname: 'search',query:{q: phrase}})
+    const onGoSearchPage = (event: any) => {
+        if (event.key === 'Enter') {
+            router.push({pathname: 'search', query: {q: phrase}})
         }
     }
     const searchInput = (
@@ -90,8 +115,9 @@ export const Navbar = () => {
         />
     );
     return (
-        <nav className='fixed w-full top-0 shadow z-50' >
-            <NextUINavbar className='z-50 bg-content1' position='sticky' maxWidth="2xl">
+        <>
+            <nav className='fixed w-full top-0 shadow z-50'>
+                <NextUINavbar className='z-50 bg-content1' position='sticky' maxWidth="2xl">
                     <NavbarContent className="basis-1/5 sm:basis-full " justify="start">
                         <NavbarBrand className="gap-3 max-w-fit hidden md:flex">
                             <NextLink className="justify-start items-center gap-1 flex" href="/">
@@ -115,36 +141,49 @@ export const Navbar = () => {
                             </Badge>
                         </NavbarItem>
                     </NavbarContent>
-            </NextUINavbar>
-            <NextUINavbar isBordered className={[
-                scrollDirection === 'down' ? '-translate-y-full' : 'h-16',
-                'transition-all overflow-hidden absolute top-16 bg-content1 hidden md:block'
-            ].join(' ')} maxWidth="2xl">
-                <NavbarContent justify='start'>
-                    <UPopover
-                        backdrop="blur"
-                        placement="bottom"
-                    >
-                        <UPopoverTrigger>
-                            <Button variant="light" size="lg" startContent={<UIcon icon="tabler:category"/>}>
-                                دسته بندی
-                            </Button>
-                        </UPopoverTrigger>
-                        <UPopoverContent className="p-0">
-                            <div className="flex">
-                                <UTabs aria-label="Tabs" isVertical color="primary">
-                                    {menuItems?.map((item,index) => (
-                                        <Tab key={`menuTab-${index}`} title={item.persianName}/>
-                                    ))}
-                                </UTabs>
-                                <div className="p-2">
-                                    salam
+                </NextUINavbar>
+                <NextUINavbar isBordered className={[
+                    scrollDirection === 'down' ? '-translate-y-full' : 'h-16',
+                    'transition-all overflow-hidden absolute top-16 bg-content1 hidden md:block'
+                ].join(' ')} maxWidth="2xl">
+                    <NavbarContent justify='start'>
+                        <UPopover
+                            backdrop="blur"
+                            placement="bottom"
+                        >
+                            <UPopoverTrigger>
+                                <Button variant="light" size="lg" startContent={<UIcon icon="tabler:category"/>}>
+                                    دسته بندی
+                                </Button>
+                            </UPopoverTrigger>
+                            <UPopoverContent className="p-0">
+                                <div className="flex">
+                                    <UTabs aria-label="Tabs" isVertical color="primary">
+                                        {menuItems?.map((item, index) => (
+                                            <Tab key={`menuTab-${index}`} title={item.persianName}/>
+                                        ))}
+                                    </UTabs>
+                                    <div className="p-2">
+                                        salam
+                                    </div>
                                 </div>
-                            </div>
-                        </UPopoverContent>
-                    </UPopover>
-                </NavbarContent>
-            </NextUINavbar>
-        </nav>
+                            </UPopoverContent>
+                        </UPopover>
+                    </NavbarContent>
+                </NextUINavbar>
+            </nav>
+            <div className={"fixed bottom-0 w-full z-50 md:hidden"}>
+                <UCard className={'rounded-none'}>
+                    <div className={"flex justify-around h-14"}>
+                        {bottomNav.map((item)=>(
+                            <UButton className={"w-full flex flex-col gap-1 h-full rounded-none"} color={router.pathname === item.route ? "primary" : "default"} variant={"light"}>
+                                <Icon icon={item.icon} fontSize={25}/>
+                                <span className={"text-xs font-bold"}>{item.label}</span>
+                            </UButton>
+                        ))}
+                    </div>
+                </UCard>
+            </div>
+        </>
     );
 };
