@@ -70,7 +70,7 @@ export const Navbar = () => {
         <UInput
             aria-label="جستجو"
             classNames={{
-                inputWrapper: "bg-default-100 w-96",
+                inputWrapper: "bg-default-100",
                 input: "text-sm",
             }}
             onKeyDown={onGoSearchPage}
@@ -92,19 +92,20 @@ export const Navbar = () => {
     return (
         <nav className='sticky top-0 shadow z-50' >
             <NextUINavbar className='z-50 bg-content1' position='sticky' maxWidth="2xl">
-                    <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
-                        <NavbarBrand className="gap-3 max-w-fit">
-                            <NextLink className="flex justify-start items-center gap-1" href="/">
+                    <NavbarContent className="basis-1/5 sm:basis-full " justify="start">
+                        <NavbarBrand className="gap-3 max-w-fit hidden md:flex">
+                            <NextLink className="justify-start items-center gap-1 flex" href="/">
                                 <Logo/>
                                 <p className="font-bold text-inherit">پرومال</p>
                             </NextLink>
                         </NavbarBrand>
-                        <NavbarItem className="lg:flex">{searchInput}</NavbarItem>
+                        <NavbarItem className={"w-full"}>{searchInput}</NavbarItem>
                     </NavbarContent>
                     <NavbarContent
                         justify="end"
+                        className={"hidden md:flex"}
                     >
-                        <NavbarItem className="flex gap-4">
+                        <NavbarItem className="gap-4 flex">
                             <ThemeSwitch/>
                             <Profile onLogin={onLogin}/>
                             <Badge content="5" color="danger" placement="bottom-right">
@@ -117,7 +118,7 @@ export const Navbar = () => {
             </NextUINavbar>
             <NextUINavbar isBordered className={[
                 scrollDirection === 'down' ? '-translate-y-full' : 'h-16',
-                'transition-all overflow-hidden absolute top-16 bg-content1'
+                'transition-all overflow-hidden absolute top-16 bg-content1 hidden md:block'
             ].join(' ')} maxWidth="2xl">
                 <NavbarContent justify='start'>
                     <UPopover
