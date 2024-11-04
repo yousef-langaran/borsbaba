@@ -69,7 +69,9 @@ interface BrandFilterProps {
 }
 const BrandFilter = (props:BrandFilterProps) =>{
     const router = useRouter()
-    const [selectedKeys, setSelectedKeys] = React.useState(router.query?.[props.queryKey || '']?.split(',')||[]);
+    const queryValue = router.query[props.queryKey || ''] as string | undefined;
+
+    const [selectedKeys, setSelectedKeys] = React.useState<any>(queryValue ? queryValue.split(',') : []);
 
     const selectedValue = React.useMemo(
         () => {
@@ -114,7 +116,7 @@ interface PriceFilterProps {
 }
 const PriceFilter = (props: PriceFilterProps) =>{
     const router = useRouter()
-    const [price,setPrice] = useState([router.query?.minPrice || props.minPrice, router.query?.maxPrice || props.maxPrice])
+    const [price,setPrice] = useState<any>([router.query?.minPrice || props.minPrice, router.query?.maxPrice || props.maxPrice])
     const onChangeEndPrice = () =>{
         router.replace({
             query:{
@@ -148,9 +150,10 @@ const SpecificationFilter = (props:SpecificationFilterProps) =>{
     const router = useRouter()
     //set first value
     useEffect(() => {
-        if (!router.isReady || !router.query?.specificationIds || !props.items) return [];
-
-        const spec = router.query.specificationIds.split(',');
+        if (!router.isReady || !router.query?.specificationIds || !props.items) return;
+        const spec = typeof router.query.specificationIds === 'string'
+            ? router.query.specificationIds.split(',')
+            : [];
         const values = spec.reduce((selected: any[], id: string) => {
             const findItem = props.items.find((item: any) => +item?.id === +id);
             if (findItem) {
@@ -158,9 +161,9 @@ const SpecificationFilter = (props:SpecificationFilterProps) =>{
             }
             return selected;
         }, []);
-        setSelectedKeys(values.map(i => i.id))
+        setSelectedKeys(values.map(i => i.id) as any)
     }, [router.isReady, router.query?.specificationIds, props.items]);
-    const [selectedKeys, setSelectedKeys] = React.useState([]);
+    const [selectedKeys, setSelectedKeys] = React.useState<any>([]);
 
     const selectedValue = React.useMemo(
         () => {
@@ -170,10 +173,13 @@ const SpecificationFilter = (props:SpecificationFilterProps) =>{
         [selectedKeys]
     );
     useEffect(() => {
-        const specs = router.query.specificationIds.split(',')
-        const mergedArray = [...specs, ...Array.from(selectedKeys)].reduce((acc, current) => {
-            const x = acc.find(item => item == current);
+        const specs = typeof router.query.specificationIds === 'string'
+            ? router.query.specificationIds.split(',')
+            : [];
+        const mergedArray:any = [...specs, ...Array.from(selectedKeys)].reduce((acc:any, current) => {
+            const x = acc.find((item:any) => item == current);
             if (!x) {
+                // @ts-ignore
                 return acc.concat([current]);
             } else {
                 return acc;
