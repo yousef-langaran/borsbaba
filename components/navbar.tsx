@@ -25,9 +25,10 @@ import {Badge} from "@nextui-org/badge";
 import {useSelector, useDispatch} from 'react-redux';
 import {fetchMenu} from "@/redux/reducers/menu";
 import {AppDispatch, RootState} from "@/redux/store";
-import {UCard, UCardBody} from "@/components/base/card";
+import {UCard} from "@/components/base/card";
 import {UButton} from "@/components/base/button/button";
 import {Icon} from "@iconify/react";
+import {getBasket} from "@/redux/reducers/basket";
 
 const bottomNav = [
     {
@@ -60,8 +61,10 @@ export const Navbar = () => {
 
     const dispatch: AppDispatch = useDispatch()
     const menuItems = useSelector((state: RootState) => state.menu.items)
+    const basket = useSelector((state: RootState) => state.basket.basket)
     useEffect(() => {
         dispatch(fetchMenu());
+        dispatch(getBasket())
     }, []);
 
     const [scrollDirection, setScrollDirection] = useState<string | null>(null);
@@ -134,7 +137,7 @@ export const Navbar = () => {
                         <NavbarItem className="gap-4 flex">
                             <ThemeSwitch/>
                             <Profile onLogin={onLogin}/>
-                            <Badge content="5" color="danger" placement="bottom-right">
+                            <Badge content={basket.totalCount} color="danger" placement="bottom-right">
                                 <Button variant="ghost" isIconOnly
                                         endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
                                 </Button>
@@ -175,8 +178,8 @@ export const Navbar = () => {
             <div className={"fixed bottom-0 w-full z-50 md:hidden"}>
                 <UCard className={'rounded-none'}>
                     <div className={"flex justify-around h-14"}>
-                        {bottomNav.map((item)=>(
-                            <UButton className={"w-full flex flex-col gap-1 h-full rounded-none"} color={router.pathname === item.route ? "primary" : "default"} variant={"light"}>
+                        {bottomNav.map((item,index)=>(
+                            <UButton key={index} className={"w-full flex flex-col gap-1 h-full rounded-none"} color={router.pathname === item.route ? "primary" : "default"} variant={"light"}>
                                 <Icon icon={item.icon} fontSize={25}/>
                                 <span className={"text-xs font-bold"}>{item.label}</span>
                             </UButton>
