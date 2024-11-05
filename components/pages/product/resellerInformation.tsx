@@ -6,6 +6,7 @@ import {useMemo} from "react";
 import _ from "lodash"
 import {Icon} from "@iconify/react";
 import {ShowPrice} from "@/components/core/price/showPrice";
+import {AddBasketButton} from "@/components/core/basket/addBasketButton";
 
 interface ResellerInformationProps {
     resellers: any
@@ -17,7 +18,7 @@ export const ResellerInformation = (props: ResellerInformationProps) => {
     }, [])
     return (
         <Card
-            className="md:bg-gray-100 md:ring-1 md:ring-gray-200 md:dark:ring-gray-800 ring-0',shadow: 'md:shadow shadow-none">
+            className="md:shadow-medium shadow-none">
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <h3 className="font-bold">فروشنده</h3>
@@ -53,13 +54,13 @@ export const ResellerInformation = (props: ResellerInformationProps) => {
                             <ShowPrice data={getMinPriceReseller} price-key="b2CPrice"/>
                         </div>
                         <div className="w-full">
-                            {/*<AddBasketButton :data="getMinPriceReseller" block/>*/}
+                            <AddBasketButton data={getMinPriceReseller} block/>
                         </div>
                     </div>
                     <div className="w-full fixed bottom-[4.5rem] p-2 shadow border-t bg-white right-0 z-10 md:hidden">
                         <div className="flex items-center justify-between h-full">
                             <div>
-                                {/*<AddBasketButton :data="getMinPriceReseller" block/>*/}
+                                <AddBasketButton data={getMinPriceReseller} block/>
                             </div>
                             <div>
                                 <ShowPrice data={getMinPriceReseller} price-key="b2CPrice"/>

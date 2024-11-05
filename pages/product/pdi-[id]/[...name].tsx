@@ -33,9 +33,9 @@ export default function IndexPage() {
                              itemClasses={{
                                  separator: "px-2"
                              }}>
-                    <BreadcrumbItem key="home">پرومال</BreadcrumbItem>
+                    <BreadcrumbItem href={"/"} key="home">پرومال</BreadcrumbItem>
                     {product.breadCrumbs?.map(item => (
-                        <BreadcrumbItem key={`breadcrum-${item.id}`}>{item.persianName}</BreadcrumbItem>
+                        <BreadcrumbItem href={`/search?productTypeIds=${item.id}`} key={`breadcrum-${item.id}`}>{item.persianName}</BreadcrumbItem>
                     ))}
                     <BreadcrumbItem>{product.persianName}</BreadcrumbItem>
                 </Breadcrumbs>
