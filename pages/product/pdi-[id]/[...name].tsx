@@ -7,6 +7,7 @@ import {GetProductDetailsResult} from "@/services/digimal";
 import {Icon} from "@iconify/react";
 import {Link} from "@nextui-org/link";
 import {ResellerInformation} from "@/components/pages/product/resellerInformation";
+import {ImageGallery} from "@/components/core/gallary";
 
 export default function IndexPage() {
     const router = useRouter()
@@ -42,7 +43,7 @@ export default function IndexPage() {
             </div>
             <div className="flex flex-col gap-4 lg:flex-row">
                 <div className="md:w-[450px]">
-                    {/*<ImageGallery :data="data?.media"/>*/}
+                    <ImageGallery data={product?.media}/>
                 </div>
                 <div className="w-full">
                     <div>
