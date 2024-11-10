@@ -33,13 +33,13 @@ export const CategoryPopup = () => {
                             {menuItems?.map((item, index) => (
                                 <Tab key={`menuTab-${index}`} title={item.persianName}>
                                     <div className="p-2 md:p-4 columns-2 md:columns-3 lg:columns-4 gap-4 w-full">
-                                        {item?.children?.length && item?.children.map((child1, index1) => (
+                                        {Array.isArray(item?.children) && item?.children.map((child1, index1) => (
                                             <ul key={index1}
                                                 className="text-primary break-inside-avoid text-xl cursor-pointer">
                                                 <p className="my-3">
                                                     {child1?.persianName}
                                                 </p>
-                                                {child1?.children?.length && child1?.children.map((child2, index2) => (
+                                                {Array.isArray(child1?.children) && child1?.children.map((child2, index2) => (
                                                     <li key={index2}
                                                         className="text-black hover:text-primary text-base py-1">
                                                         {child2?.persianName}
