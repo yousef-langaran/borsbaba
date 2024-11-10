@@ -22,7 +22,7 @@ export const ImageGallery = (props:ImageGalleryProps) => {
                 <Swiper
                 spaceBetween={10}
                 modules={modules}
-                thumbs={{ swiper: thumbsSwiper }}
+                thumbs={{swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null}}
                 className="mySwiper2 h-full md:!h-[80%]">
                     {props.data?.allMedias?.map((item,index)=>(
                         <SwiperSlide key={index}>

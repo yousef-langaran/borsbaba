@@ -29,6 +29,7 @@ import {UCard} from "@/components/base/card";
 import {UButton} from "@/components/base/button/button";
 import {Icon} from "@iconify/react";
 import {getBasket} from "@/redux/reducers/basket";
+import {CategoryPopup} from "@/components/core/category";
 
 const bottomNav = [
     {
@@ -145,41 +146,19 @@ export const Navbar = () => {
                         </NavbarItem>
                     </NavbarContent>
                 </NextUINavbar>
-                <NextUINavbar isBordered className={[
+                <NextUINavbar isBordered classNames={{wrapper: "mx-auto"}} className={[
                     scrollDirection === 'down' ? '-translate-y-full' : 'h-16',
                     'transition-all overflow-hidden absolute top-16 bg-content1 hidden md:block'
                 ].join(' ')} maxWidth="2xl">
-                    <NavbarContent justify='start'>
-                        <UPopover
-                            backdrop="blur"
-                            placement="bottom"
-                        >
-                            <UPopoverTrigger>
-                                <Button variant="light" size="lg" startContent={<UIcon icon="tabler:category"/>}>
-                                    دسته بندی
-                                </Button>
-                            </UPopoverTrigger>
-                            <UPopoverContent className="p-0">
-                                <div className="flex">
-                                    <UTabs aria-label="Tabs" isVertical color="primary">
-                                        {menuItems?.map((item, index) => (
-                                            <Tab key={`menuTab-${index}`} title={item.persianName}/>
-                                        ))}
-                                    </UTabs>
-                                    <div className="p-2">
-                                        salam
-                                    </div>
-                                </div>
-                            </UPopoverContent>
-                        </UPopover>
-                    </NavbarContent>
+                    <CategoryPopup/>
                 </NextUINavbar>
             </nav>
             <div className={"fixed bottom-0 w-full z-50 md:hidden"}>
                 <UCard className={'rounded-none'}>
                     <div className={"flex justify-around h-14"}>
-                        {bottomNav.map((item,index)=>(
-                            <UButton key={index} className={"w-full flex flex-col gap-1 h-full rounded-none"} color={router.pathname === item.route ? "primary" : "default"} variant={"light"}>
+                        {bottomNav.map((item, index) => (
+                            <UButton key={index} className={"w-full flex flex-col gap-1 h-full rounded-none"}
+                                     color={router.pathname === item.route ? "primary" : "default"} variant={"light"}>
                                 <Icon icon={item.icon} fontSize={25}/>
                                 <span className={"text-xs font-bold"}>{item.label}</span>
                             </UButton>
