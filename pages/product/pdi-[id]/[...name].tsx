@@ -43,7 +43,7 @@ export default function IndexPage() {
             </div>
             <div className="flex flex-col gap-4 lg:flex-row">
                 <div className="md:w-[450px]">
-                    <ImageGallery data={product?.media}/>
+                    <ImageGallery data={product?.media as any}/>
                 </div>
                 <div className="w-full">
                     <div>
@@ -65,12 +65,12 @@ export default function IndexPage() {
                                     <Icon fontSize="15" className="text-gray-400" icon="fluent-mdl2:location-dot"/>
                                     <Link className="text-sm text-cyan-500">0 پرسش</Link>
                                 </div>
-                                {product?.properties?.length &&
+                                {product?.properties && product.properties.length > 0 && (
                                     <div>
                                         <div className="text-xl mb-4">{product?.properties[0].title}: مشکی</div>
                                         {/*<UColorSelect v-model="property" :data="data?.properties"/>*/}
                                     </div>
-                                }
+                                )}
                             </div>
                         </div>
                         <div className="md:w-[400px] w-full">

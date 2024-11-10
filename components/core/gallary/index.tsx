@@ -26,10 +26,11 @@ export const ImageGallery = (props:ImageGalleryProps) => {
                 className="mySwiper2 h-full md:!h-[80%]">
                     {props.data?.allMedias?.map((item,index)=>(
                         <SwiperSlide key={index}>
-                            <Image src={item.url || ''}/>
+                            <Image classNames={{wrapper:"h-full mx-auto"}} src={item.url || ''}/>
                         </SwiperSlide>
                     ))}
                 </Swiper>
+                <div className={"hidden md:flex"}>
                 <Swiper
                     spaceBetween={5}
                     onSwiper={setThumbsSwiper}
@@ -44,6 +45,7 @@ export const ImageGallery = (props:ImageGalleryProps) => {
                         </SwiperSlide>
                     ))}
                 </Swiper>
+                </div>
             </div>
         </div>
     )
