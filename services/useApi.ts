@@ -4,9 +4,13 @@ import axios from "axios";
 import Cookies from "js-cookie";
 class UseApi {
     constructor() {
+        if (!Cookies.get('UniqueId')) {
+            const UID = Math.floor(Math.random() * 10 ** 16).toString().padStart(16, '0')
+            Cookies.set('UniqueId',UID)
+        }
         axios.interceptors.request.use(function (config) {
-            // config.headers['authorization'] = 'Bearer ' + Cookies.get('auth')
-            // config.headers['UniqueId'] = Cookies.get('uniqueId')
+            config.headers['authorization'] = 'Bearer ' + Cookies.get('auth')
+            config.headers['UniqueId'] = Cookies.get('UniqueId')
             return config
         })
         axios.interceptors.response.use(function (response) {

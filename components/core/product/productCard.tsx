@@ -20,7 +20,7 @@ export const ProductCard = (props: ProductCardProps) => {
                     />
                     <div className={"grow"}>
                     <h2 className="text-ellipsis line-clamp-2 h-12">{props.product?.persianName}</h2>
-                    <ShowPrice data={props.product} price-key="b2CPrice"/>
+                    <ShowPrice data={props.product} priceKey="b2CPrice"/>
                     </div>
                 </div>
             </div>

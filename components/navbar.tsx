@@ -138,7 +138,7 @@ export const Navbar = () => {
                         <NavbarItem className="gap-4 flex">
                             <ThemeSwitch/>
                             <Profile onLogin={onLogin}/>
-                            <Badge content={basket.totalCount} color="danger" placement="bottom-right">
+                            <Badge content={basket?.totalCount} color="danger" placement="bottom-right">
                                 <Button variant="ghost" isIconOnly
                                         endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
                                 </Button>

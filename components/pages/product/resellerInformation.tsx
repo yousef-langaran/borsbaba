@@ -15,7 +15,7 @@ interface ResellerInformationProps {
 export const ResellerInformation = (props: ResellerInformationProps) => {
     const getMinPriceReseller = useMemo<any>(() => {
         return _.minBy(props.resellers, 'b2CPrice')
-    }, [])
+    }, [props.resellers])
     return (
         <Card
             className="md:shadow-medium shadow-none">
@@ -51,7 +51,7 @@ export const ResellerInformation = (props: ResellerInformationProps) => {
                     <Divider className={"hidden md:block"}/>
                     <div className="flex-col items-end gap-5 hidden md:flex">
                         <div className="flex gap-2 items-center">
-                            <ShowPrice data={getMinPriceReseller} price-key="b2CPrice"/>
+                            <ShowPrice data={getMinPriceReseller} priceKey="b2CPrice"/>
                         </div>
                         <div className="w-full">
                             <AddBasketButton data={getMinPriceReseller} block/>
@@ -63,7 +63,7 @@ export const ResellerInformation = (props: ResellerInformationProps) => {
                                 <AddBasketButton data={getMinPriceReseller} block/>
                             </div>
                             <div>
-                                <ShowPrice data={getMinPriceReseller} price-key="b2CPrice"/>
+                                <ShowPrice data={getMinPriceReseller} priceKey="b2CPrice"/>
                             </div>
                         </div>
                     </div>

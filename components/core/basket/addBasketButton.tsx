@@ -24,10 +24,10 @@ export const AddBasketButton = (props: AddBasketButtonProps) => {
             priceTypeId: 2 as any,
             productAndPropertyPriceId: props.data?.productAndPropertyPriceId || 0
         }
-    }, [])
+    }, [props.data])
     const getProductInBasket = useMemo(() => {
         return basket?.basketItems?.find((item) => item?.productAndPropertyPriceId === props.data?.productAndPropertyPriceId)
-    }, [])
+    }, [basket?.basketItems])
     const addBasketItem = async () => {
         setIsLoading(true)
         await dispatch(addBasket(basketDto))
@@ -53,27 +53,33 @@ export const AddBasketButton = (props: AddBasketButtonProps) => {
     }
     return (
         <>
-            {props.countKey && +props.data?.[props.countKey] || props.notCount &&
+            {(props.countKey && +props.data?.[props.countKey] || props.notCount) &&
                 <div>
                     {!getProductInBasket ?
-                        <Button color={`primary`} className={`${props.block && 'w-full'}`} v-if="!getProductInBasket"
+                        <Button color={`primary`} className={`${props.block && 'w-full'}`}
                                 onClick={addBasketItem}
                                 isLoading={isLoading}>افزودن به سبد خرید
                         </Button>
                         :
                         <div className={"flex gap-2"}>
-                            <Button color={"success"} isIconOnly onClick={()=>updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count-1 : 0)}>
+                            <Button color={"success"} isIconOnly
+                                    onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count + 1 : 0)}>
                                 <Icon icon={"hugeicons:add-01"} fontSize={25}/>
                             </Button>
                             <Input classNames={{input: 'text-center'}}
                                    value={getProductInBasket?.count ? getProductInBasket?.count.toString() : "0"}
                                    readOnly variant={"bordered"} className={"w-20"} color={"primary"}/>
-                            <Button color={"danger"} isIconOnly onClick={deleteItemBasket}>
-                                <Icon icon={"hugeicons:delete-03"} fontSize={25}/>
-                            </Button>
-                            <Button color={"danger"} isIconOnly onClick={()=>updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count-1 : 0)}>
-                                <Icon icon={"hugeicons:minus-sign"} fontSize={25}/>
-                            </Button>
+                            {getProductInBasket.count && getProductInBasket.count === 1 ?
+
+                                <Button color={"danger"} isIconOnly onClick={deleteItemBasket}>
+                                    <Icon icon={"hugeicons:delete-03"} fontSize={25}/>
+                                </Button>
+                                :
+                                <Button color={"danger"} isIconOnly
+                                        onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count - 1 : 0)}>
+                                    <Icon icon={"hugeicons:minus-sign"} fontSize={25}/>
+                                </Button>
+                            }
                         </div>
                     }
                 </div>
@@ -81,3 +87,7 @@ export const AddBasketButton = (props: AddBasketButtonProps) => {
         </>
     )
 }
+
+AddBasketButton.defaultProps = {
+    countKey: 'remainingCount',
+};
