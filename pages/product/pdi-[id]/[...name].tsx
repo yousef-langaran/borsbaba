@@ -2,7 +2,7 @@ import DefaultLayout from "@/layouts/default";
 import api from "@/services/useApi";
 import React, {useEffect, useMemo, useState} from "react";
 import {useRouter} from "next/router";
-import {BreadcrumbItem, Breadcrumbs, cn, Radio, RadioGroup} from "@nextui-org/react";
+import {BreadcrumbItem, Breadcrumbs, cn, Divider, Radio, RadioGroup} from "@nextui-org/react";
 import {GetProductDetailsResult} from "@/services/digimal";
 import {Icon} from "@iconify/react";
 import {Link} from "@nextui-org/link";
@@ -94,6 +94,10 @@ export default function IndexPage() {
                         </div>
                     </div>
                 </div>
+            </div>
+            <Divider/>
+            <div>
+
             </div>
         </DefaultLayout>
     )
