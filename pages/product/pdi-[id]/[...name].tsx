@@ -67,7 +67,7 @@ export default function IndexPage() {
                                 </div>
                                 {product?.properties && product.properties.length > 0 && (
                                     <div>
-                                        <div className="text-xl mb-4">{product?.properties[0].title}: مشکی</div>
+                                        <div className="text-xl mb-4">{product?.properties.find(i=> property === i.id)?.value} : {product?.properties[0].title}</div>
                                         <RadioGroup onValueChange={setProperty} value={property}>
                                             {product.properties.map((item:any)=>(
                                                 <Radio
@@ -85,7 +85,6 @@ export default function IndexPage() {
                                                 </Radio>
                                             ))}
                                         </RadioGroup>
-                                        {/*<UColorSelect v-model="property" :data="data?.properties"/>*/}
                                     </div>
                                 )}
                             </div>
