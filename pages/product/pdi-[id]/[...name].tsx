@@ -1,8 +1,8 @@
 import DefaultLayout from "@/layouts/default";
 import api from "@/services/useApi";
-import {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {useRouter} from "next/router";
-import {BreadcrumbItem, Breadcrumbs} from "@nextui-org/react";
+import {BreadcrumbItem, Breadcrumbs, cn, Radio, RadioGroup} from "@nextui-org/react";
 import {GetProductDetailsResult} from "@/services/digimal";
 import {Icon} from "@iconify/react";
 import {Link} from "@nextui-org/link";
@@ -23,7 +23,7 @@ export default function IndexPage() {
     }
     const getResellers = useMemo(() => {
         return product?.resellers?.filter(i => i.productPropertyId === property)
-    }, [product])
+    }, [product,property])
     useEffect(() => {
         productGetById()
     }, [router])
@@ -68,6 +68,23 @@ export default function IndexPage() {
                                 {product?.properties && product.properties.length > 0 && (
                                     <div>
                                         <div className="text-xl mb-4">{product?.properties[0].title}: مشکی</div>
+                                        <RadioGroup onValueChange={setProperty} value={property}>
+                                            {product.properties.map((item:any)=>(
+                                                <Radio
+                                                    key={item.id}
+                                                    value={item.id as any}
+                                                    classNames={{
+                                                        base: cn(
+                                                            "inline-flex m-0 bg-content1 hover:bg-content2 items-center justify-between",
+                                                            "flex-row-reverse max-w-[300px] cursor-pointer rounded-lg gap-4 p-4 border-2 border-transparent",
+                                                            "data-[selected=true]:border-primary border-default"
+                                                        ),
+                                                    }}
+                                                >
+                                                    {item.value}
+                                                </Radio>
+                                            ))}
+                                        </RadioGroup>
                                         {/*<UColorSelect v-model="property" :data="data?.properties"/>*/}
                                     </div>
                                 )}
