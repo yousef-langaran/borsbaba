@@ -18,11 +18,11 @@ export default function IndexPage() {
         if (PID)
             api.ProductApi.apiServicesAppProductGetByIdGet(PID).then((res: any) => {
                 setProduct(res.data.result as GetProductDetailsResult)
-                setProperty(res.data.result?.resellers && res.data.result?.resellers[0].productPropertyId)
+                setProperty(res.data.result?.resellers && res.data.result?.resellers[0]?.productPropertyId)
             })
     }
     const getResellers = useMemo(() => {
-        return product?.resellers?.filter(i => i.productPropertyId === property)
+        return product?.resellers?.filter(i => i?.productPropertyId === property)
     }, [product,property])
     useEffect(() => {
         productGetById()
