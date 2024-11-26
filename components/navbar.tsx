@@ -30,6 +30,7 @@ import {UButton} from "@/components/base/button/button";
 import {Icon} from "@iconify/react";
 import {getBasket} from "@/redux/reducers/basket";
 import {CategoryPopup} from "@/components/core/category";
+import {BasketPopover} from "@/components/layout/basket";
 
 const bottomNav = [
     {
@@ -62,7 +63,7 @@ export const Navbar = () => {
 
     const dispatch: AppDispatch = useDispatch()
     const menuItems = useSelector((state: RootState) => state.menu.items)
-    const basket = useSelector((state: RootState) => state.basket.basket)
+
     useEffect(() => {
         dispatch(fetchMenu());
         dispatch(getBasket())
@@ -138,11 +139,7 @@ export const Navbar = () => {
                         <NavbarItem className="gap-4 flex">
                             <ThemeSwitch/>
                             <Profile onLogin={onLogin}/>
-                            <Badge content={basket?.totalCount} color="danger" placement="bottom-right">
-                                <Button variant="ghost" isIconOnly
-                                        endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
-                                </Button>
-                            </Badge>
+                            <BasketPopover/>
                         </NavbarItem>
                     </NavbarContent>
                 </NextUINavbar>

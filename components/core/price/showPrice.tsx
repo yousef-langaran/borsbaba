@@ -6,6 +6,7 @@ interface ShowPriceProps {
     specialPriceKey?: string,
     countKey?: string,
     notCount?: boolean,
+    className?: string
 }
 
 export const ShowPrice = ({
@@ -13,13 +14,14 @@ export const ShowPrice = ({
                               specialPriceKey = 'specialPrice',
                               countKey = 'remainingCount',
                               notCount,
-                              data
+                              data,
+                              className
                           }: ShowPriceProps) => {
     return (
         <>
             {
                 data?.[countKey] || notCount ?
-                    <div className="pt-1 flex flex-col items-stretch justify-between">
+                    <div className={`t-1 flex flex-col items-stretch justify-between ${className}`}>
                         <div className="flex items-center justify-between">
                             {data?.specialPrice &&
                                 <div
