@@ -14,19 +14,25 @@ interface AddBasketButtonProps {
     notCount?: boolean
 }
 
-export const AddBasketButton = (props: AddBasketButtonProps) => {
+export const AddBasketButton = ({
+                                    block,
+                                    data,
+                                    size,
+                                    countKey = 'remainingCount',
+                                    notCount
+                                }: AddBasketButtonProps) => {
     const dispatch: AppDispatch = useDispatch()
     const basket = useSelector((state: RootState) => state.basket.basket)
     const [isLoading, setIsLoading] = useState(false)
     const basketDto = useMemo(() => {
         return {
-            price: props.data?.b2CPrice || 0,
+            price: data?.b2CPrice || 0,
             priceTypeId: 2 as any,
-            productAndPropertyPriceId: props.data?.productAndPropertyPriceId || 0
+            productAndPropertyPriceId: data?.productAndPropertyPriceId || 0
         }
-    }, [props.data])
+    }, [data])
     const getProductInBasket = useMemo(() => {
-        return basket?.basketItems?.find((item) => item?.productAndPropertyPriceId === props.data?.productAndPropertyPriceId)
+        return basket?.basketItems?.find((item) => item?.productAndPropertyPriceId === data?.productAndPropertyPriceId)
     }, [basket?.basketItems])
     const addBasketItem = async () => {
         setIsLoading(true)
@@ -53,10 +59,10 @@ export const AddBasketButton = (props: AddBasketButtonProps) => {
     }
     return (
         <>
-            {(props.countKey && +props.data?.[props.countKey] || props.notCount) &&
+            {(countKey && +data?.[countKey] || notCount) &&
                 <div>
                     {!getProductInBasket ?
-                        <Button color={`primary`} className={`${props.block && 'w-full'}`}
+                        <Button color={`primary`} className={`${block && 'w-full'}`}
                                 onClick={addBasketItem}
                                 isLoading={isLoading}>افزودن به سبد خرید
                         </Button>
@@ -87,7 +93,3 @@ export const AddBasketButton = (props: AddBasketButtonProps) => {
         </>
     )
 }
-
-AddBasketButton.defaultProps = {
-    countKey: 'remainingCount',
-};
