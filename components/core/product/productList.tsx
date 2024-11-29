@@ -12,9 +12,9 @@ interface ProductListProps {
 export const ProductList = (props: ProductListProps) => {
     return (
         <div className="flex">
-            <div>
-                <Image className="w-24 h-24 ml-4" src={props.data?.url}/>
-                <AddBasketButton data={props.data}/>
+            <div className={"flex flex-col gap-4 items-center justify-center"}>
+                <Image className="w-24 h-24" src={props.data?.url}/>
+                <AddBasketButton data={props.data} countKey={"count"} not-count size="sm"/>
             </div>
             <div className="flex flex-col w-full gap-4 mr-8">
                 <p className="font-bold text-xl">{ props.data?.productName }</p>
@@ -31,8 +31,7 @@ export const ProductList = (props: ProductListProps) => {
                     <span>ارسال فوری امروز فعلا در مشهد</span>
                 </div>
                 <div className="flex items-center gap-4">
-                    <ShowPrice data={props.data} not-count/>
-                    <AddBasketButton data={props.data} not-count size="sm"/>
+                    <ShowPrice data={props.data} countKey={"count"}/>
                 </div>
             </div>
         </div>

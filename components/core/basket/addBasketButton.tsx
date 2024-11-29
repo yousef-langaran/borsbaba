@@ -5,11 +5,12 @@ import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/redux/store";
 import {addBasket, deleteBasketItem, updateBasketItem} from "@/redux/reducers/basket";
 import {Icon} from "@iconify/react";
+import {ButtonGroup} from "@nextui-org/react";
 
 interface AddBasketButtonProps {
     block?: boolean,
     data: any,
-    size?: 'xs' | 'sm' | 'lg' | 'xl' | '2xl',
+    size?: 'sm' | 'md' | 'lg',
     countKey?: string,
     notCount?: boolean
 }
@@ -68,24 +69,26 @@ export const AddBasketButton = ({
                         </Button>
                         :
                         <div className={"flex gap-2"}>
-                            <Button color={"success"} isIconOnly
+                            <ButtonGroup>
+                            <Button variant={"faded"} size={size} color={"success"} isIconOnly
                                     onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count + 1 : 0)}>
                                 <Icon icon={"hugeicons:add-01"} fontSize={25}/>
                             </Button>
-                            <Input classNames={{input: 'text-center'}}
+                            <Input size={size} classNames={{input: 'text-center',inputWrapper: 'rounded-none'}}
                                    value={getProductInBasket?.count ? getProductInBasket?.count.toString() : "0"}
-                                   readOnly variant={"bordered"} className={"w-20"} color={"primary"}/>
+                                   readOnly variant={"bordered"} className={"w-10"} color={"primary"}/>
                             {getProductInBasket.count && getProductInBasket.count === 1 ?
 
-                                <Button color={"danger"} isIconOnly onClick={deleteItemBasket}>
-                                    <Icon icon={"hugeicons:delete-03"} fontSize={25}/>
+                                <Button variant={"faded"} size={size} color={"danger"} isIconOnly onClick={deleteItemBasket}>
+                                    <Icon icon={"hugeicons:delete-03"} fontSize={20}/>
                                 </Button>
                                 :
-                                <Button color={"danger"} isIconOnly
+                                <Button variant={"faded"} size={size} color={"danger"} isIconOnly
                                         onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count - 1 : 0)}>
-                                    <Icon icon={"hugeicons:minus-sign"} fontSize={25}/>
+                                    <Icon icon={"hugeicons:minus-sign"} fontSize={20}/>
                                 </Button>
                             }
+                            </ButtonGroup>
                         </div>
                     }
                 </div>

@@ -24,32 +24,34 @@ export const BasketPopover = () => {
                         </Badge>
                     </div>
                 </PopoverTrigger>
-                <PopoverContent className={"!p-0"}>
-                    <Card onMouseLeave={() => setIsOpen(false)}>
-                        <CardHeader>
-                            <div className="flex justify-between">
-                                <span> {basket?.totalCount} کالا</span>
-                            </div>
-                        </CardHeader>
-                        <CardBody>
-                            {basket?.basketItems && basket?.basketItems.map((basketItem, index) => (
-                                <div key={index} className="py-4">
-                                    <ProductList data={basketItem}/>
+                {basket?.totalCount &&
+                    <PopoverContent className={"!p-0"}>
+                        <Card onMouseLeave={() => setIsOpen(false)}>
+                            <CardHeader>
+                                <div className="flex justify-between">
+                                    <span> {basket?.totalCount} کالا</span>
                                 </div>
-                            ))
-                            }
-                        </CardBody>
-                        <CardFooter>
-                            <div className="flex justify-between">
-                                <div>
-                                    <p className="text-sm m1-2">مبلغ قابل پرداخت:</p>
-                                    <ShowPrice data={{price: basket?.totalPrice}} className="text-2xl font-bold"/>
+                            </CardHeader>
+                            <CardBody>
+                                {basket?.basketItems && basket?.basketItems.map((basketItem, index) => (
+                                    <div key={index} className="py-4">
+                                        <ProductList data={basketItem}/>
+                                    </div>
+                                ))
+                                }
+                            </CardBody>
+                            <CardFooter>
+                                <div className="flex justify-between items-end w-full">
+                                    <div>
+                                        <p className="text-sm m1-2">مبلغ قابل پرداخت:</p>
+                                        <ShowPrice data={{price: basket?.totalPrice}} notCount className="text-2xl font-bold"/>
+                                    </div>
+                                    <Button color={"primary"} href={"/checkout/cart"}>ثبت سفارش</Button>
                                 </div>
-                                <Button href={"/checkout/cart"}>ثبت سفارش</Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                </PopoverContent>
+                            </CardFooter>
+                        </Card>
+                    </PopoverContent>
+                }
             </Popover>
         </>
     )
