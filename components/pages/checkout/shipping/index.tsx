@@ -6,7 +6,7 @@ import {Input} from "@nextui-org/input";
 import {ShowPrice} from "@/components/core/price/showPrice";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/redux/store";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {getBasket} from "@/redux/reducers/basket";
 import api from "@/services/useApi";
 import {AddressAdd} from "@/components/core/address/add";
@@ -20,6 +20,7 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
     const [isLoading, setIsLoading] = useState(false)
     const [address, setAddress] = useState<any>(null)
     const dispatch: AppDispatch = useDispatch()
+    const addressAddRef = useRef<{ openModal: () => void; closeModal: () => void }>(null);
     const fetchAddFactor = async () => {
         try {
             setIsLoading(true)
@@ -46,7 +47,7 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
     }, []);
     return (
         <>
-            <AddressAdd/>
+            <AddressAdd ref={addressAddRef}/>
             <div className="containerCustom mx-auto">
                 <div className="md:mb-4 border-b-2">
                     <Card>

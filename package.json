@@ -13,7 +13,7 @@
 		"@capacitor/cli": "^6.1.2",
 		"@capacitor/core": "^6.1.2",
 		"@neshan-maps-platform/ol": "^1.0.5",
-		"@neshan-maps-platform/react-openlayers": "^3.0.1",
+		"@neshan-maps-platform/react-openlayers": "^2.0.16",
 		"@nextui-org/button": "2.0.38",
 		"@nextui-org/code": "2.0.33",
 		"@nextui-org/input": "2.2.5",
