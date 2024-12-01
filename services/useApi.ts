@@ -9,7 +9,7 @@ class UseApi {
             Cookies.set('UniqueId',UID)
         }
         axios.interceptors.request.use(function (config) {
-            config.headers['authorization'] = 'Bearer ' + Cookies.get('auth')
+            config.headers['authorization'] = 'Bearer ' + Cookies.get('token')
             config.headers['UniqueId'] = Cookies.get('UniqueId')
             return config
         })

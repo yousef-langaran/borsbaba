@@ -1,17 +1,17 @@
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
-import {useEffect, useImperativeHandle, useRef} from "react"
+import {forwardRef, useEffect, useImperativeHandle, useRef} from "react"
 import {Map} from "@neshan-maps-platform/ol"
 import NeshanMap, {NeshanMapRef} from "@neshan-maps-platform/react-openlayers"
 import {Button} from "@nextui-org/button";
 import {useDisclosure} from "@reactuses/core";
 
 interface AddressAddProps {
-    ref?: any
+
 }
 
 const mapKey = "web.3285b73742624f1f9b5245178ae5c537"
 const serviceKey = "service.5f5aa6caaebf45d9b7d17a8b93dbe605"
-export const AddressAdd = ({ref}:AddressAddProps) => {
+export const AddressAdd = forwardRef(({}:AddressAddProps,ref) => {
     const {isOpen, onOpen, onOpenChange, onClose} = useDisclosure();
     const mapRef = useRef<NeshanMapRef | null>(null)
     useImperativeHandle(ref, () => ({
@@ -19,16 +19,12 @@ export const AddressAdd = ({ref}:AddressAddProps) => {
         closeModal: onClose,
     }));
     const onInit = (map: Map) => {
-        map.setMapType("osm-bright")
-        map.switchTrafficLayer(true)
+        // map.setMapType("osm-bright")
+        // map.switchTrafficLayer(true)
+        map.on('click',(e)=>{
+            console.log(e)
+        })
     }
-
-    useEffect(() => {
-        if (mapRef.current?.map) {
-            mapRef.current?.map.switchTrafficLayer(true)
-            mapRef.current?.map.setMapType("standard-night")
-        }
-    }, [])
 
     return (
         <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -49,16 +45,17 @@ export const AddressAdd = ({ref}:AddressAddProps) => {
                             zoom={13}
                             traffic={false}
                             poi={false}
+
                         ></NeshanMap>
                     </div>
                 </ModalBody>
                 <ModalFooter>
                     <div className="flex justify-end gap-4">
-                        <Button>بستن</Button>
-                        <Button>تایید و ادامه</Button>
+                        <Button variant={"light"}>بستن</Button>
+                        <Button color={"primary"}>تایید و ادامه</Button>
                     </div>
                 </ModalFooter>
             </ModalContent>
         </Modal>
     )
-}
+})

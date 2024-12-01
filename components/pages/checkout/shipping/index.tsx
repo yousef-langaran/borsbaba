@@ -9,7 +9,8 @@ import {AppDispatch, RootState} from "@/redux/store";
 import {useEffect, useRef, useState} from "react";
 import {getBasket} from "@/redux/reducers/basket";
 import api from "@/services/useApi";
-import {AddressAdd} from "@/components/core/address/add";
+import {AddressCurrent} from "@/components/core/address/current";
+import {AddressList} from "@/components/core/address/list";
 
 interface PageCheckoutShippingProps {
 
@@ -20,7 +21,7 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
     const [isLoading, setIsLoading] = useState(false)
     const [address, setAddress] = useState<any>(null)
     const dispatch: AppDispatch = useDispatch()
-    const addressAddRef = useRef<{ openModal: () => void; closeModal: () => void }>(null);
+    const addressListRef = useRef<{ openModal: () => void; closeModal: () => void }>(null);
     const fetchAddFactor = async () => {
         try {
             setIsLoading(true)
@@ -47,14 +48,14 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
     }, []);
     return (
         <>
-            <AddressAdd ref={addressAddRef}/>
+            <AddressList ref={addressListRef} onChange={setAddress}/>
             <div className="containerCustom mx-auto">
                 <div className="md:mb-4 border-b-2">
                     <Card>
                         <CardBody>
                             <div className="relative flex flex-row justify-center items-center mx-auto md:bg-white">
                                 <Button href={"/checkout/cart"}
-                                        className="static mr-0 ml-auto absolute color-heading right-0 flex items-center text-black">
+                                        className="static mr-0 ml-auto color-heading right-0 flex items-center text-black">
                                     <Icon icon={"i-heroicons:arrow-small-right-20-solid"}/>
                                     <span className={"hidden md:inline"}>اطلاعات ارسال و پرداخت</span>
                                 </Button>
@@ -66,7 +67,7 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
                 <div>
                     <div className="flex gap-4">
                         <div className="grow grid md:gap-4 divide-y h-fit">
-                            {/*<PagesCheckoutShippingBaseAddressCurrent @change="isDialogEditAddress = true" :address="address"/>*/}
+                            <AddressCurrent address={address} onChange={()=> addressListRef.current && addressListRef.current.openModal()}/>
                             <Card>
                                 <CardBody>
                                     <div className={"flex gap-2 items-center"}>

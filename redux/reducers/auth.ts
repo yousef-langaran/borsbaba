@@ -22,7 +22,7 @@ export const auth = createSlice({
         },
         checkToken(state){
             state.token = Cookies.get('token') as string
-        }
+        },
     },
 });
 export const { login, logout, checkToken } = auth.actions;
