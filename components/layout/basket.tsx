@@ -8,8 +8,10 @@ import {RootState} from "@/redux/store";
 import {Card, CardBody, CardFooter, CardHeader} from "@nextui-org/card";
 import {ShowPrice} from "@/components/core/price/showPrice";
 import {ProductList} from "@/components/core/product/productList";
+import {useRouter} from "next/router";
 
 export const BasketPopover = () => {
+    const router = useRouter()
     const basket = useSelector((state: RootState) => state.basket.basket)
     const [isOpen, setIsOpen] = useState(false)
     return (
@@ -18,7 +20,7 @@ export const BasketPopover = () => {
                 <PopoverTrigger>
                     <div onMouseOver={() => setIsOpen(true)}>
                         <Badge content={basket?.totalCount} color="danger" placement="bottom-right">
-                            <Button variant="ghost" isIconOnly
+                            <Button onClick={()=>router.push({pathname:"/checkout/cart"})} href={"/checkout/cart"} variant="ghost" isIconOnly
                                     endContent={<UIcon className="text-xl" icon="tabler:basket"/>}>
                             </Button>
                         </Badge>
@@ -46,7 +48,7 @@ export const BasketPopover = () => {
                                         <p className="text-sm m1-2">مبلغ قابل پرداخت:</p>
                                         <ShowPrice data={{price: basket?.totalPrice}} notCount className="text-2xl font-bold"/>
                                     </div>
-                                    <Button color={"primary"} href={"/checkout/cart"}>ثبت سفارش</Button>
+                                    <Button onClick={()=>router.push({pathname:"/checkout/shipping"})} color={"primary"} href={"/checkout/cart"}>ثبت سفارش</Button>
                                 </div>
                             </CardFooter>
                         </Card>

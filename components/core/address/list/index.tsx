@@ -74,7 +74,7 @@ export const AddressList = forwardRef(({onChange}: AddressAddProps, ref) => {
                     </ModalBody>
                 </ModalContent>
             </Modal>
-            <AddressAdd ref={addressAddRef}/>
+            <AddressAdd ref={addressAddRef} onAdded={fetchListAddress}/>
         </>
     );
 });

@@ -4,7 +4,6 @@ import {
     NavbarBrand,
     NavbarItem,
 } from "@nextui-org/navbar";
-import {Button} from "@nextui-org/button";
 import {Kbd} from "@nextui-org/kbd";
 import NextLink from "next/link";
 import {useRouter} from 'next/router'
@@ -15,13 +14,8 @@ import {
     Logo,
 } from "@/components/icons";
 import {UInput} from "@/components/base/input";
-import {UIcon} from "@/components/base/icon";
-import {UPopover, UPopoverContent, UPopoverTrigger} from "@/components/base/popover";
-import {UTabs} from "@/components/base/tabs/tabs";
-import {Tab} from "@nextui-org/tabs";
 import React, {useEffect, useState} from "react";
 import {Profile} from "@/components/pages/layout/profile";
-import {Badge} from "@nextui-org/badge";
 import {useSelector, useDispatch} from 'react-redux';
 import {fetchMenu} from "@/redux/reducers/menu";
 import {AppDispatch, RootState} from "@/redux/store";
@@ -58,7 +52,7 @@ export const Navbar = () => {
     const router = useRouter()
     const [phrase, setPhrase] = useState('')
     const onLogin = () => {
-        router.push('auth/login')
+        router.push('/auth/login')
     }
 
     const dispatch: AppDispatch = useDispatch()
