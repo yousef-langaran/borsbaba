@@ -1,11 +1,9 @@
-import {Button} from "@nextui-org/button";
-import {Input} from "@nextui-org/input";
 import {useMemo, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/redux/store";
 import {addBasket, deleteBasketItem, updateBasketItem} from "@/redux/reducers/basket";
 import {Icon} from "@iconify/react";
-import {ButtonGroup} from "@nextui-org/react";
+import {ButtonGroup,Button, Input} from "@nextui-org/react";
 
 interface AddBasketButtonProps {
     block?: boolean,
@@ -70,24 +68,25 @@ export const AddBasketButton = ({
                         :
                         <div className={"flex gap-2"}>
                             <ButtonGroup>
-                            <Button variant={"faded"} size={size} color={"success"} isIconOnly
-                                    onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count + 1 : 0)}>
-                                <Icon icon={"hugeicons:add-01"} fontSize={25}/>
-                            </Button>
-                            <Input size={size} classNames={{input: 'text-center',inputWrapper: 'rounded-none'}}
-                                   value={getProductInBasket?.count ? getProductInBasket?.count.toString() : "0"}
-                                   readOnly variant={"bordered"} className={"w-10"} color={"primary"}/>
-                            {getProductInBasket.count && getProductInBasket.count === 1 ?
+                                <Button variant={"faded"} size={size} color={"success"} isIconOnly
+                                        onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count + 1 : 0)}>
+                                    <Icon icon={"hugeicons:add-01"} fontSize={25}/>
+                                </Button>
+                                <Input size={size} classNames={{input: 'text-center', inputWrapper: 'rounded-none'}}
+                                       value={getProductInBasket?.count ? getProductInBasket?.count.toString() : "0"}
+                                       readOnly variant={"bordered"} className={"w-10"} color={"primary"}/>
+                                {getProductInBasket.count && getProductInBasket.count === 1 ?
 
-                                <Button variant={"faded"} size={size} color={"danger"} isIconOnly onClick={deleteItemBasket}>
-                                    <Icon icon={"hugeicons:delete-03"} fontSize={20}/>
-                                </Button>
-                                :
-                                <Button variant={"faded"} size={size} color={"danger"} isIconOnly
-                                        onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count - 1 : 0)}>
-                                    <Icon icon={"hugeicons:minus-sign"} fontSize={20}/>
-                                </Button>
-                            }
+                                    <Button variant={"faded"} size={size} color={"danger"} isIconOnly
+                                            onClick={deleteItemBasket}>
+                                        <Icon icon={"hugeicons:delete-03"} fontSize={20}/>
+                                    </Button>
+                                    :
+                                    <Button variant={"faded"} size={size} color={"danger"} isIconOnly
+                                            onClick={() => updateBasketsItem(getProductInBasket.count ? +getProductInBasket.count - 1 : 0)}>
+                                        <Icon icon={"hugeicons:minus-sign"} fontSize={20}/>
+                                    </Button>
+                                }
                             </ButtonGroup>
                         </div>
                     }

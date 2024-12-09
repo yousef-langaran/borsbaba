@@ -2,7 +2,7 @@ import {UPopover, UPopoverContent, UPopoverTrigger} from "@/components/base/popo
 import {Button} from "@nextui-org/button";
 import {UIcon} from "@/components/base/icon";
 import {UTabs} from "@/components/base/tabs/tabs";
-import {Tab} from "@nextui-org/tabs";
+import {Tab} from "@nextui-org/react";
 import {NavbarContent} from "@nextui-org/navbar";
 import React from "react";
 import {useSelector} from "react-redux";

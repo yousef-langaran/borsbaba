@@ -1,4 +1,3 @@
-import {Control as RHFControl} from "react-hook-form/dist/types/form";
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
 import {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react"
 import NeshanMap, {NeshanMapRef, OlMap, Ol} from "@neshan-maps-platform/react-openlayers"

@@ -87,7 +87,7 @@ export const Navbar = () => {
     }, [lastScrollY]);
     const onGoSearchPage = (event: any) => {
         if (event.key === 'Enter') {
-            router.push({pathname: 'search', query: {q: phrase}})
+            router.push({pathname: '/search', query: {q: phrase}})
         }
     }
     const searchInput = (

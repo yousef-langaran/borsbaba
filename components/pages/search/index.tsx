@@ -5,7 +5,7 @@ import {useRouter} from "next/router";
 import {GetFilterItemsAndProductsByUserResult} from "@/services/digimal";
 import {ProductCard} from "@/components/core/product/productCard";
 import {UTabs} from "@/components/base/tabs/tabs";
-import {Tab, Tabs} from "@nextui-org/tabs";
+import {Tab, Tabs} from "@nextui-org/react";
 
 export const PageSearch = () => {
     const router = useRouter()
@@ -13,10 +13,10 @@ export const PageSearch = () => {
     const fetchProducts = async () => {
         try {
             const {data} = await api.ProductApi.apiServicesAppProductFilterByUserPost({
-                brandIds: typeof router.query.brandIds === 'string' ? router.query.brandIds.split(',').map(Number) : [],
-                productTypeIds: typeof router.query?.productTypeIds === 'string' ? router.query?.productTypeIds?.split(',').map(Number) : [],
+                brandIds: (typeof router.query.brandIds === 'string' && router.query.brandIds) ? router.query.brandIds.split(',').map(Number) : [],
+                productTypeIds: (typeof router.query?.productTypeIds === 'string' && router.query.productTypeIds) ? router.query?.productTypeIds?.split(',').map(Number) : [],
                 propertyIds: [],
-                specificationIds: typeof router.query?.specificationIds === 'string' ? router.query?.specificationIds?.split(',').map(Number) : [],
+                specificationIds: (typeof router.query?.specificationIds === 'string' && router.query.specificationIds) ? router.query?.specificationIds?.split(',').map(Number) : [],
                 minPrice: router.query?.minPrice ? +router.query?.minPrice : 0,
                 maxPrice: router.query?.maxPrice ? +router.query?.maxPrice : 9999999999999999999999,
                 pageIndex: 1,
@@ -46,7 +46,7 @@ export const PageSearch = () => {
             <div className="grow">
                 <div className='justify-between items-center mb-4 hidden md:flex'>
                     <Tabs size='sm'>
-                        { resultProduct?.sorts?.map((item,index)=>(
+                        {resultProduct?.sorts?.map((item, index) => (
                             <Tab key={`sorts-${item.value}`} title={item.persianTitle}/>
                         ))
                         }
