@@ -1,8 +1,6 @@
-import {Card, CardBody} from "@nextui-org/card";
-import {Button} from "@nextui-org/button";
+import {Card, CardBody, Button, Input} from "@nextui-org/react";
 import {Icon} from "@iconify/react";
 import {AppLogo} from "@/components/core/app/logo";
-import {Input} from "@nextui-org/input";
 import {ShowPrice} from "@/components/core/price/showPrice";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/redux/store";

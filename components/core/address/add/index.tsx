@@ -1,6 +1,7 @@
+"use"
+
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
 import {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react"
-import NeshanMap, {NeshanMapRef, OlMap, Ol} from "@neshan-maps-platform/react-openlayers"
 import {Button} from "@nextui-org/button";
 import {useDisclosure} from "@reactuses/core";
 import axios from "axios";
@@ -11,6 +12,9 @@ import {Controller, useForm} from "react-hook-form";
 import {AddAddressDto} from "@/services/digimal";
 import {Checkbox, Divider} from "@nextui-org/react";
 import api from "@/services/useApi";
+import '@neshan-maps-platform/ol/ol.css';
+import View from "@neshan-maps-platform/ol/View"
+import {toLonLat,fromLonLat} from "@neshan-maps-platform/ol/proj"
 
 interface AddressAddProps {
     onAdded?: () => void
@@ -49,50 +53,47 @@ interface Step1Props {
     onApi?: any
 }
 
-const Step1 = ({onNext, onClose, onApi}: Step1Props) => {
-    const mapRef = useRef<NeshanMapRef | null>(null)
-    const [ol, setOl] = useState<Ol>()
-    const [olMap, setOlMap] = useState<OlMap>()
+const Step1 = ({ onNext, onClose, onApi }: Step1Props) => {
+    useEffect(() => {
+        let mapInstance: any;
+        import('@neshan-maps-platform/ol/Map').then(({ default: Map }) => {
+                    mapInstance = new Map({
+                        maptype: 'neshan',
+                        target: 'map',
+                        key: mapKey,
+                        poi: true,
+                        traffic: true,
+                        view: new View({
+                            center: fromLonLat([51.389, 35.6892]),
+                            zoom: 14,
+                        }),
+                    });
+
+                    mapInstance.on('click', async (event: any) => {
+                        const coordinates = event.coordinate;
+                        const [longitude, latitude] = toLonLat(coordinates);
+                        await reverseGeocoding(latitude, longitude);
+                    });
+        });
+
+        return () => {
+            if (mapInstance) {
+                mapInstance.setTarget(null); // Cleanup map instance
+            }
+        };
+    }, []);
+
     const reverseGeocoding = async (lat: string | number, lng: string | number) => {
         try {
-            const {data} = await axios.get(`https://api.neshan.org/v4/reverse?lat=${lat}&lng=${lng}`, {
-                headers: {
-                    "Api-Key": serviceKey
-                }
-            })
-            onApi?.({...data, lat: lat, lng: lng})
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
-    const onInit = async (ol: Ol, map: OlMap) => {
-        setOl(ol)
-        setOlMap(map)
-        const markerSource = new ol.source.Vector();
-        const markerLayer = new ol.layer.Vector({
-            source: markerSource,
-            style: new ol.style.Style({
-                image: new ol.style.Icon({
-                    anchor: [0.5, 1],
-                    src: '/assets/marker.webp', // مسیر آیکون مارکر
-                    scale: 0.03
-                }),
-            }),
-        });
-        map.addLayer(markerLayer);
-        map.on('click', async (e) => {
-            const coordinates = e.coordinate;
-            const marker = new ol.Feature({
-                type: 'marker',
-                geometry: new ol.geom.Point(coordinates),
+            const { data } = await axios.get(`https://api.neshan.org/v4/reverse?lat=${lat}&lng=${lng}`, {
+                headers: { "Api-Key": serviceKey },
             });
-            markerSource.clear();
-            markerSource.addFeature(marker);
-            const [longitude, latitude] = ol.proj.toLonLat(coordinates);
-            await reverseGeocoding(latitude, longitude)
-        })
-    }
+            onApi?.({ ...data, lat, lng });
+        } catch (error) {
+            console.error("Reverse geocoding error:", error);
+        }
+    };
+
     return (
         <ModalContent>
             <ModalHeader>
@@ -102,28 +103,22 @@ const Step1 = ({onNext, onClose, onApi}: Step1Props) => {
             </ModalHeader>
             <ModalBody>
                 <div className="w-full h-96 rounded-xl overflow-hidden">
-                    <NeshanMap
-                        ref={mapRef}
-                        mapKey={mapKey}
-                        defaultType="neshan"
-                        center={{latitude: 35.7665394, longitude: 51.4749824}}
-                        style={{height: "48vh", width: "100%"}}
-                        onInit={onInit}
-                        zoom={13}
-                        traffic={false}
-                        poi={false}
-                    ></NeshanMap>
+                    <div id="map" style={{ width: "100%", height: "400px" }}></div>
                 </div>
             </ModalBody>
             <ModalFooter>
                 <div className="flex justify-end gap-4">
-                    <Button variant={"light"} onClick={onClose}>بستن</Button>
-                    <Button color={"primary"} onClick={onNext}>تایید و ادامه</Button>
+                    <Button variant="light" onClick={onClose}>
+                        بستن
+                    </Button>
+                    <Button color="primary" onClick={onNext}>
+                        تایید و ادامه
+                    </Button>
                 </div>
             </ModalFooter>
         </ModalContent>
-    )
-}
+    );
+};
 
 const schema = yup
     .object({

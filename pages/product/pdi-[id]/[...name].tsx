@@ -8,6 +8,8 @@ import {Icon} from "@iconify/react";
 import {Link} from "@nextui-org/link";
 import {ResellerInformation} from "@/components/pages/product/resellerInformation";
 import {ImageGallery} from "@/components/core/gallary";
+import {ResellersList} from "@/components/pages/product/resellersList";
+import {Specifications} from "@/components/pages/product/specifications";
 
 export default function IndexPage() {
     const router = useRouter()
@@ -97,7 +99,10 @@ export default function IndexPage() {
             </div>
             <Divider/>
             <div>
-
+                <ResellersList resellers={getResellers}/>
+            </div>
+            <div>
+                <Specifications specifications={product.specifications} />
             </div>
         </DefaultLayout>
     )

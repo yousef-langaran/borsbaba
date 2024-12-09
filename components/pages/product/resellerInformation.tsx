@@ -28,7 +28,7 @@ export const ResellerInformation = (props: ResellerInformationProps) => {
             <CardBody>
                 <div className="flex flex-col gap-5">
                     <div className="flex gap-2">
-                        <Image src=""></Image>
+                        {/*<Image src=""></Image>*/}
                         <div className="flex-grow">
                             <span>{getMinPriceReseller?.storeName}</span>
                             <div className="flex text-xs mt-2">

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Image, ImageProps} from "@nextui-org/image";
+import {Image, ImageProps} from "@nextui-org/react";
 
 export const UImage = ({children,...props}: ImageProps) => (
     <Image
