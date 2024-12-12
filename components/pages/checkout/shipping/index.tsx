@@ -83,7 +83,7 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
                                             <span>قابل پرداخت</span>
                                             <ShowPrice data={{price: basket?.totalPrice}} notCount/>
                                         </div>
-                                        <Button onClick={fetchAddFactor} isLoading={isLoading}>پرداخت</Button>
+                                        <Button color={"primary"} onClick={fetchAddFactor} isLoading={isLoading}>پرداخت</Button>
                                     </div>
                                 </CardBody>
                             </Card>
@@ -96,7 +96,7 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
                                 <ShowPrice data={{price: basket?.totalPrice}} notCount/>
                             </div>
                             <div>
-                                <Button onClick={fetchAddFactor} isLoading={isLoading}>پرداخت</Button>
+                                <Button onClick={fetchAddFactor} color={"primary"} isLoading={isLoading}>پرداخت</Button>
                             </div>
                         </div>
                     </div>

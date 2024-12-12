@@ -10,6 +10,8 @@ import {ResellerInformation} from "@/components/pages/product/resellerInformatio
 import {ImageGallery} from "@/components/core/gallary";
 import {ResellersList} from "@/components/pages/product/resellersList";
 import {Specifications} from "@/components/pages/product/specifications";
+import {Introduction} from "@/components/pages/product/introduction";
+import ExpertCheck from "@/components/pages/product/expertCheck";
 
 export default function IndexPage() {
     const router = useRouter()
@@ -25,7 +27,7 @@ export default function IndexPage() {
     }
     const getResellers = useMemo(() => {
         return product?.resellers?.filter(i => i?.productPropertyId === property)
-    }, [product,property])
+    }, [product, property])
     useEffect(() => {
         productGetById()
     }, [router])
@@ -38,7 +40,8 @@ export default function IndexPage() {
                              }}>
                     <BreadcrumbItem href={"/"} key="home">پرومال</BreadcrumbItem>
                     {product.breadCrumbs?.map(item => (
-                        <BreadcrumbItem href={`/search?productTypeIds=${item.id}`} key={`breadcrum-${item.id}`}>{item.persianName}</BreadcrumbItem>
+                        <BreadcrumbItem href={`/search?productTypeIds=${item.id}`}
+                                        key={`breadcrum-${item.id}`}>{item.persianName}</BreadcrumbItem>
                     ))}
                     <BreadcrumbItem>{product.persianName}</BreadcrumbItem>
                 </Breadcrumbs>
@@ -69,9 +72,10 @@ export default function IndexPage() {
                                 </div>
                                 {product?.properties && product.properties.length > 0 && (
                                     <div>
-                                        <div className="text-xl mb-4">{product?.properties.find(i=> property === i.id)?.value} : {product?.properties[0].title}</div>
+                                        <div
+                                            className="text-xl mb-4">{product?.properties.find(i => property === i.id)?.value} : {product?.properties[0].title}</div>
                                         <RadioGroup onValueChange={setProperty} value={property}>
-                                            {product.properties.map((item:any)=>(
+                                            {product.properties.map((item: any) => (
                                                 <Radio
                                                     key={item.id}
                                                     value={item.id as any}
@@ -98,11 +102,27 @@ export default function IndexPage() {
                 </div>
             </div>
             <Divider/>
-            <div>
-                <ResellersList resellers={getResellers}/>
-            </div>
-            <div>
-                <Specifications specifications={product.specifications} />
+            <div className={"flex flex-col gap-8 mt-8"}>
+                {!!getResellers?.length &&
+                    <div>
+                        <ResellersList resellers={getResellers}/>
+                    </div>
+                }
+                {!!product.introduction &&
+                    <div>
+                        <Introduction introduction={product.introduction}/>
+                    </div>
+                }
+                {!!product.expertCheck &&
+                    <div>
+                        <ExpertCheck expertCheck={JSON.parse(product.expertCheck as string)}/>
+                    </div>
+                }
+                {!!product.specifications?.length &&
+                    <div>
+                        <Specifications specifications={product.specifications}/>
+                    </div>
+                }
             </div>
         </DefaultLayout>
     )
