@@ -13,8 +13,6 @@ import {AddAddressDto} from "@/services/digimal";
 import {Checkbox, Divider} from "@nextui-org/react";
 import api from "@/services/useApi";
 import '@neshan-maps-platform/ol/ol.css';
-import View from "@neshan-maps-platform/ol/View"
-import {toLonLat,fromLonLat} from "@neshan-maps-platform/ol/proj"
 
 interface AddressAddProps {
     onAdded?: () => void
@@ -56,29 +54,79 @@ interface Step1Props {
 const Step1 = ({ onNext, onClose, onApi }: Step1Props) => {
     useEffect(() => {
         let mapInstance: any;
-        import('@neshan-maps-platform/ol/Map').then(({ default: Map }) => {
-                    mapInstance = new Map({
-                        maptype: 'neshan',
-                        target: 'map',
-                        key: mapKey,
-                        poi: true,
-                        traffic: true,
-                        view: new View({
-                            center: fromLonLat([51.389, 35.6892]),
-                            zoom: 14,
-                        }),
-                    });
+        let markerLayer: any;
 
-                    mapInstance.on('click', async (event: any) => {
-                        const coordinates = event.coordinate;
-                        const [longitude, latitude] = toLonLat(coordinates);
-                        await reverseGeocoding(latitude, longitude);
-                    });
+        import('@neshan-maps-platform/ol/Map').then(async ({ default: Map }) => {
+            const { default: View } = await import('@neshan-maps-platform/ol/View');
+            const { fromLonLat, toLonLat } = await import('@neshan-maps-platform/ol/proj');
+            const { default: VectorLayer } = await import('@neshan-maps-platform/ol/layer/Vector');
+            const { default: VectorSource } = await import('@neshan-maps-platform/ol/source/Vector');
+            const { default: Feature } = await import('@neshan-maps-platform/ol/Feature');
+            const { default: Point } = await import('@neshan-maps-platform/ol/geom/Point');
+            const { default: Style } = await import('@neshan-maps-platform/ol/style/Style');
+            const { default: Icon } = await import('@neshan-maps-platform/ol/style/Icon');
+            const { default: Text } = await import('@neshan-maps-platform/ol/style/Text');
+            const { default: Fill } = await import('@neshan-maps-platform/ol/style/Fill');
+            const { default: Stroke } = await import('@neshan-maps-platform/ol/style/Stroke');
+            // ایجاد یک لایه برداری برای مارکرها
+            const vectorSource = new VectorSource();
+            markerLayer = new VectorLayer({
+                source: vectorSource,
+            });
+
+            // ایجاد نقشه
+            mapInstance = new Map({
+                maptype: 'neshan',
+                target: 'map',
+                key: mapKey,
+                poi: true,
+                traffic: true,
+                layers: [markerLayer],
+                view: new View({
+                    center: fromLonLat([51.389, 35.6892]),
+                    zoom: 14,
+                }),
+            });
+
+            // افزودن رویداد کلیک
+            mapInstance.on('click', async (event: any) => {
+                const coordinates = event.coordinate;
+                const [longitude, latitude] = toLonLat(coordinates);
+
+                // ایجاد مارکر جدید با متن
+                const markerFeature = new Feature({
+                    geometry: new Point(coordinates),
+                });
+
+                // پاک کردن مارکرهای قبلی و افزودن مارکر جدید
+                vectorSource.clear();
+                vectorSource.addFeature(markerFeature);
+
+                // انجام عملیات معکوس جغرافیایی
+                const reverseGeocodingData = await reverseGeocoding(latitude, longitude);
+                markerFeature.setStyle(
+                    new Style({
+                        image: new Icon({
+                            src: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // آدرس تصویر مارکر
+                            anchor: [0.5, 1],
+                            scale: 0.05,
+                        }),
+                        text: new Text({
+                            text: reverseGeocodingData?.formatted_address, // متن بالای مارکر
+                            font: '12px iranyekan',
+                            backgroundFill: new Fill({ color: '#fff' }),
+                            fill: new Fill({ color: '#000' }), // رنگ متن
+                            stroke: new Stroke({ color: '#fff', width: 2 }), // رنگ و عرض حاشیه
+                            offsetY: -40, // فاصله متن از مارکر
+                        }),
+                    })
+                );
+            });
         });
 
         return () => {
             if (mapInstance) {
-                mapInstance.setTarget(null); // Cleanup map instance
+                mapInstance.setTarget(null); // پاک کردن نقشه
             }
         };
     }, []);
@@ -89,6 +137,7 @@ const Step1 = ({ onNext, onClose, onApi }: Step1Props) => {
                 headers: { "Api-Key": serviceKey },
             });
             onApi?.({ ...data, lat, lng });
+            return data
         } catch (error) {
             console.error("Reverse geocoding error:", error);
         }
@@ -119,6 +168,8 @@ const Step1 = ({ onNext, onClose, onApi }: Step1Props) => {
         </ModalContent>
     );
 };
+
+
 
 const schema = yup
     .object({

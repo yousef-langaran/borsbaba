@@ -59,10 +59,10 @@ export const PagesLogin = (props: PagesLoginProps) => {
                             <AnimatePresence>
                                 {isSignInType !== 0 && (
                                     <motion.div
-                                        initial={{opacity: 0, scale: 0}}  // حالت اولیه (ورودی)
-                                        animate={{opacity: 1, scale: 1}}    // حالت نهایی (ورودی)
-                                        exit={{opacity: 0, scale: 0}}     // حالت خروجی (محو شدن و حرکت به چپ)
-                                        transition={{duration: 0.3}}    // مدت زمان انیمیشن
+                                        initial={{opacity: 0, scale: 0}}
+                                        animate={{opacity: 1, scale: 1}}
+                                        exit={{opacity: 0, scale: 0}}
+                                        transition={{duration: 0.3}}
                                     >
                                         <UButton isIconOnly onClick={() => setIsSignInType(0)}>
                                             <UIcon fontSize={20} icon="solar:arrow-left-outline"/>
@@ -77,7 +77,6 @@ export const PagesLogin = (props: PagesLoginProps) => {
                     <AnimatePresence mode="wait">
                         {isSignInType !== null && (
                             <motion.div
-                                key={isSignInType}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}

@@ -1,6 +1,6 @@
 import * as React from "react";
 import {UseCardProps} from "@nextui-org/card/dist/use-card";
-import {Card, CardHeader, CardBody, CardFooter} from "@nextui-org/card";
+import {Card, CardHeader, CardBody, CardFooter} from "@nextui-org/react";
 import {CardFooterProps} from "@nextui-org/card/dist/card-footer";
 import {HTMLNextUIProps} from "@nextui-org/system";
 
