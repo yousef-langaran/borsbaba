@@ -1,4 +1,4 @@
-import {ReactNode, useState} from "react";
+import {ReactNode, useEffect, useState} from "react";
 import {UCard, UCardBody, UCardHeader} from "@/components/base/card";
 import {Logo} from "@/components/icons";
 import {UInput} from "@/components/base/input";
@@ -7,7 +7,6 @@ import {ULink} from "@/components/base/link/link";
 import {UIcon} from "@/components/base/icon";
 import api from "@/services/useApi";
 import {motion, AnimatePresence} from "framer-motion"
-import Cookies from "js-cookie";
 import {useRouter} from "next/router";
 import {useDispatch} from "react-redux";
 import {login} from "@/redux/reducers/auth";
@@ -18,81 +17,93 @@ interface PagesLoginProps {
 }
 
 export const PagesLogin = (props: PagesLoginProps) => {
-    const router = useRouter()
-    const dispatch: AppDispatch = useDispatch()
-    const [isSignInType, setIsSignInType] = useState(0)
-    const [username, setUsername] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter();
+    const dispatch: AppDispatch = useDispatch();
+    const [isSignInType, setIsSignInType] = useState(0);
+    const [username, setUsername] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
     const onSetUser = (username: string) => {
-        setUsername(username)
-        setIsSignInType(1)
-    }
+        setUsername(username);
+        setIsSignInType(1);
+    };
+
     const onLogin = async (password: string) => {
-        setIsLoading(true)
-        const {data} :any = await api.TokenAuthApi.apiTokenAuthAuthenticatePost({
+        setIsLoading(true);
+        const { data }: any = await api.TokenAuthApi.apiTokenAuthAuthenticatePost({
             userNameOrEmailAddress: username,
-            password: password
-        })
-        dispatch(login(data.result.accessToken))
-        router.push('/')
-        setIsLoading(false)
-    }
+            password: password,
+        });
+        dispatch(login(data.result.accessToken));
+        router.push('/');
+        setIsLoading(false);
+    };
+
     const loginComponent = () => {
         if (isSignInType === 0) {
-            return <PagesLoginSetUser onLoginClick={onSetUser}/>
+            return <PagesLoginSetUser key="loginSetUser" onLoginClick={onSetUser} />;
         } else if (isSignInType === 1) {
-            return <PagesLoginSetPassword onLoginClick={onLogin} loading={isLoading}/>
+            return <PagesLoginSetPassword key="loginSetPassword" onLoginClick={onLogin} loading={isLoading} />;
         }
-    }
+    };
+
     return (
         <div className="h-screen w-screen flex items-center justify-center">
-            <motion.div layout>
-            <UCard className="w-[27rem] p-4">
-                <UCardHeader>
-                    <div className="flex justify-between w-full">
-                        <div className="w-10"></div>
-                        <div className="flex items-center">
-                            <Logo/>
-                            <span>پرومال</span>
+            <motion.div
+                layout
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                <UCard className="w-[27rem] p-4">
+                    <UCardHeader>
+                        <div className="flex justify-between w-full">
+                            <div className="w-10"></div>
+                            <div className="flex items-center">
+                                <Logo />
+                                <span>پرومال</span>
+                            </div>
+                            <div className="w-10">
+                                <AnimatePresence mode="wait">
+                                    {isSignInType !== 0 && (
+                                        <motion.div
+                                            key={`signInType-${isSignInType}`}
+                                            initial={{ opacity: 0,scale: 0 }}
+                                            animate={{ opacity: 1,scale: 1 }}
+                                            exit={{ opacity: 0,scale: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <UButton isIconOnly onClick={() => setIsSignInType(0)}>
+                                                <UIcon fontSize={20} icon="solar:arrow-left-outline" />
+                                            </UButton>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
-                        <div className="w-10">
-                            <AnimatePresence>
-                                {isSignInType !== 0 && (
-                                    <motion.div
-                                        initial={{opacity: 0, scale: 0}}
-                                        animate={{opacity: 1, scale: 1}}
-                                        exit={{opacity: 0, scale: 0}}
-                                        transition={{duration: 0.3}}
-                                    >
-                                        <UButton isIconOnly onClick={() => setIsSignInType(0)}>
-                                            <UIcon fontSize={20} icon="solar:arrow-left-outline"/>
-                                        </UButton>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                    </UCardHeader>
+                    <div>
+                        <AnimatePresence mode="wait">
+                            {isSignInType !== null && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    layout
+                                >
+                                    {loginComponent()}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
-                </UCardHeader>
-                <div>
-                    <AnimatePresence mode="wait">
-                        {isSignInType !== null && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.3 }}
-                                layout
-                            >
-                                {loginComponent()}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </UCard>
+                </UCard>
             </motion.div>
         </div>
-    )
-}
+    );
+};
+
 
 interface PagesLoginSetUserProps {
     onLoginClick: (username: string) => void;
