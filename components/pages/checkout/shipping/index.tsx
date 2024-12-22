@@ -9,12 +9,14 @@ import {getBasket} from "@/redux/reducers/basket";
 import api from "@/services/useApi";
 import {AddressCurrent} from "@/components/core/address/current";
 import {AddressList} from "@/components/core/address/list";
+import {useRouter} from "next/router";
 
 interface PageCheckoutShippingProps {
 
 }
 
 export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
+    const router = useRouter()
     const basket = useSelector((state: RootState) => state.basket.basket)
     const [isLoading, setIsLoading] = useState(false)
     const [address, setAddress] = useState<any>(null)
@@ -48,24 +50,27 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
         <>
             <AddressList ref={addressListRef} onChange={setAddress}/>
             <div className="containerCustom mx-auto">
-                <div className="md:mb-4 border-b-2">
+                <div className="md:mb-4">
                     <Card>
                         <CardBody>
-                            <div className="relative flex flex-row justify-center items-center mx-auto md:bg-white">
-                                <Button href={"/checkout/cart"}
-                                        className="static mr-0 ml-auto color-heading right-0 flex items-center text-black">
-                                    <Icon icon={"i-heroicons:arrow-small-right-20-solid"}/>
-                                    <span className={"hidden md:inline"}>اطلاعات ارسال و پرداخت</span>
-                                </Button>
+                            <div className="flex justify-between items-center">
+                                <div className={"w-20"}>
+                                    <Button onClick={()=> router.push("/checkout/cart")}
+                                            className="static mr-0 ml-auto color-heading right-0 flex items-center text-black" isIconOnly>
+                                        <Icon icon={"solar:double-alt-arrow-right-outline"} fontSize={25}/>
+                                    </Button>
+                                </div>
+                                <AppLogo/>
+                                <div className={"w-20"}/>
                             </div>
-                            <AppLogo/>
                         </CardBody>
                     </Card>
                 </div>
                 <div>
                     <div className="flex gap-4">
-                        <div className="grow grid md:gap-4 divide-y h-fit">
-                            <AddressCurrent address={address} onChange={()=> addressListRef.current && addressListRef.current.openModal()}/>
+                        <div className="grow grid mt-4 md:mt-0 gap-4 divide-y h-fit">
+                            <AddressCurrent address={address}
+                                            onChange={() => addressListRef.current && addressListRef.current.openModal()}/>
                             <Card>
                                 <CardBody>
                                     <div className={"flex gap-2 items-center"}>
@@ -83,7 +88,8 @@ export const PageCheckoutShipping = (props: PageCheckoutShippingProps) => {
                                             <span>قابل پرداخت</span>
                                             <ShowPrice data={{price: basket?.totalPrice}} notCount/>
                                         </div>
-                                        <Button color={"primary"} onClick={fetchAddFactor} isLoading={isLoading}>پرداخت</Button>
+                                        <Button color={"primary"} onClick={fetchAddFactor}
+                                                isLoading={isLoading}>پرداخت</Button>
                                     </div>
                                 </CardBody>
                             </Card>

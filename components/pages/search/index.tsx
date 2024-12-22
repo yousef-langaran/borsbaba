@@ -5,13 +5,15 @@ import {useRouter} from "next/router";
 import {GetFilterItemsAndProductsByUserResult} from "@/services/digimal";
 import {ProductCard} from "@/components/core/product/productCard";
 import {UTabs} from "@/components/base/tabs/tabs";
-import {Tab, Tabs} from "@nextui-org/react";
+import {Skeleton, Tab, Tabs} from "@nextui-org/react";
 
 export const PageSearch = () => {
     const router = useRouter()
     const [resultProduct, setResultProduct] = useState<GetFilterItemsAndProductsByUserResult | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
     const fetchProducts = async () => {
         try {
+            setIsLoading(true)
             const {data} = await api.ProductApi.apiServicesAppProductFilterByUserPost({
                 brandIds: (typeof router.query.brandIds === 'string' && router.query.brandIds) ? router.query.brandIds.split(',').map(Number) : [],
                 productTypeIds: (typeof router.query?.productTypeIds === 'string' && router.query.productTypeIds) ? router.query?.productTypeIds?.split(',').map(Number) : [],
@@ -26,12 +28,14 @@ export const PageSearch = () => {
             })
             const {result}: any = data as GetFilterItemsAndProductsByUserResult
             setResultProduct(result)
+            setIsLoading(false)
             // products.value = result.productsList.productsInfo
             // totalCount.value = result.productsList.totalCount
             // filters.value = result.filters
             // sorts.value = result.sorts
         } catch (e) {
             console.error(e)
+            setIsLoading(false)
         }
     }
     useEffect(() => {
@@ -56,6 +60,12 @@ export const PageSearch = () => {
                 <div className='products-list'>
                     {Array.isArray(resultProduct?.productsList?.productsInfo) && resultProduct?.productsList?.productsInfo.map((item, index) => (
                         <ProductCard key={`product-${index}`} product={item}/>
+                    ))}
+
+                    {isLoading && Array.from(new Array(5)).map(item => (
+                        <a className={"flex w-full h-full p-4"}>
+                            <Skeleton className={"w-full h-[29.171875rem]"} key={item}/>
+                        </a>
                     ))}
                 </div>
             </div>

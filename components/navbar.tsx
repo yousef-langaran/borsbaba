@@ -148,7 +148,7 @@ export const Navbar = () => {
                 <UCard className={'rounded-none'}>
                     <div className={"flex justify-around h-14"}>
                         {bottomNav.map((item, index) => (
-                            <UButton key={index} className={"w-full flex flex-col gap-1 h-full rounded-none"}
+                            <UButton onClick={()=> router.push(item.route)} key={index} className={"w-full flex flex-col gap-1 h-full rounded-none"}
                                      color={router.pathname === item.route ? "primary" : "default"} variant={"light"}>
                                 <Icon icon={item.icon} fontSize={25}/>
                                 <span className={"text-xs font-bold"}>{item.label}</span>

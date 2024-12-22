@@ -57,7 +57,7 @@ export const ResellerInformation = (props: ResellerInformationProps) => {
                             <AddBasketButton data={getMinPriceReseller} block/>
                         </div>
                     </div>
-                    <div className="w-full fixed bottom-[4.5rem] p-2 shadow border-t bg-white right-0 z-10 md:hidden">
+                    <div className="w-full fixed bottom-[3.5rem] p-2 shadow border-t bg-content1 right-0 z-10 md:hidden">
                         <div className="flex items-center justify-between h-full">
                             <div>
                                 <AddBasketButton data={getMinPriceReseller} block/>
