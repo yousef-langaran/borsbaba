@@ -1,4 +1,4 @@
-import {FieldLabel, Puck, usePuck} from "@measured/puck";
+import {FieldLabel, Puck, usePuck,} from "@measured/puck";
 import "@measured/puck/puck.css";
 import {Input, Textarea} from "@nextui-org/input";
 import {Card, CardBody} from "@nextui-org/card";

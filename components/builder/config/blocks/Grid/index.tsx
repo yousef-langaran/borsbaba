@@ -32,15 +32,16 @@ export const Grid: ComponentConfig<GridProps> = {
     render: ({gap, numColumns}) => {
         return (
             <Section>
-              <DropZone
-                zone="grid"
-                disallow={["Hero", "Stats"]}
-                style={{
-                  display:"grid",
-                  gap,
-                  gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
-                }}
-              ></DropZone>
+                <DropZone
+                    className={getClassName()}
+                    zone="grid"
+                    disallow={["Hero", "Stats"]}
+                    style={{
+                        display: "grid",
+                        gap,
+                        gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
+                    }}
+                ></DropZone>
             </Section>
         );
     },

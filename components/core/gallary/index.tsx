@@ -58,8 +58,8 @@ export const SliderGallery = ({images}: SliderGalleryProps) => {
     return (
         <>
             <Swiper>
-                {Array.isArray(images) && images.map(image => (
-                    <SwiperSlide>
+                {Array.isArray(images) && images.map((image,index) => (
+                    <SwiperSlide key={index}>
                         <Image alt={image.alt} src={image.imageLink}/>
                     </SwiperSlide>
                 ))}
