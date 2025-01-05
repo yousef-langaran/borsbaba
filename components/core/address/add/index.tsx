@@ -1,7 +1,7 @@
 "use"
 
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
-import {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react"
+import {forwardRef, useEffect, useImperativeHandle, useState} from "react"
 import {Button} from "@nextui-org/button";
 import {useDisclosure} from "@reactuses/core";
 import axios from "axios";

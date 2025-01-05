@@ -1,8 +1,7 @@
 import * as React from "react";
-import {UseBadgeProps} from "@nextui-org/react";
-import {Badge} from "@nextui-org/react";
+import {Badge, BadgeProps} from "@nextui-org/react";
 
-export const UBadge = ({children,...props}: UseBadgeProps) => (
+export const UBadge = ({children,...props}: BadgeProps) => (
     <Badge
         {...props}>
         {children}

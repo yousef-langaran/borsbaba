@@ -9,7 +9,10 @@ import "@/styles/globals.css";
 
 import {Provider} from 'react-redux';
 import store from '../redux/store';
-
+import 'swiper/css';
+import 'swiper/css/free-mode';
+import 'swiper/css/navigation';
+import 'swiper/css/thumbs';
 export default function App({Component, pageProps}: AppProps) {
     const router = useRouter();
 

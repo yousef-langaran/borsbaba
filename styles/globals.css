@@ -1,5 +1,7 @@
 @import "main.css";
 @import "pages/search/main.css";
+@import "core/gallary/main.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
