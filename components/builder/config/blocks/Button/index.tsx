@@ -4,7 +4,8 @@ import {Button as ButtonNextUi, ButtonProps} from "@nextui-org/button";
 
 
 export const Button: ComponentConfig<ButtonProps> = {
-  label: "Button",
+  label: "Button hasan",
+
   fields: {
     children: { type: "text" },
     href: { type: "text" },

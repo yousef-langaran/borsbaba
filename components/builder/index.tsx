@@ -2,31 +2,56 @@ import {FieldLabel, Puck, usePuck} from "@measured/puck";
 import "@measured/puck/puck.css";
 import {Input, Textarea} from "@nextui-org/input";
 import {Card, CardBody} from "@nextui-org/card";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import conf, {initialData} from "@/components/builder/config";
 import {Icon} from "@iconify/react";
 import {Button, Select, SelectItem, Tab, Tabs} from "@nextui-org/react";
 
-const JSONRenderer = () => {
-    const {appState, selectedItem, history,} = usePuck();
-    return <div>{JSON.stringify(appState.data)}</div>;
+const PublishButton = () => {
+    const {appState} = usePuck();
+    return (
+        <Button onClick={() => onPublish(appState)} color={"primary"}>
+            Publish
+        </Button>
+    )
 };
-
-// Save the data to your database
-const save = (data:any) => {
+const BackForward = () =>{
+    const {history} = usePuck()
+    return (
+        <div className={"flex items-center gap-2"}>
+            <Button onPress={()=> history.forward()} size={"sm"}>
+                <span>بعدی</span>
+                <Icon icon={"solar:undo-left-round-broken"} fontSize={20}/>
+            </Button>
+            <Button onPress={()=> history.back()} size={"sm"}>
+                <span>قبلی</span>
+                <Icon icon={"solar:undo-right-round-broken"} fontSize={20}/>
+            </Button>
+        </div>
+    )
+}
+const onPublish = (data:any) => {
     console.log(data)
 };
 
-// Render Puck editor
 export function BuilderEditor() {
     const [isSidebarLeft, setIsSidebarLeft] = useState(true)
     const [isSidebarRight, setIsSidebarRight] = useState(true)
+
+
     return (
-        <Puck config={conf} data={initialData} onPublish={save} overrides={{
+        <Puck config={conf} data={initialData} overrides={{
             components: ({children}) => (
                 <div className={"customComponentsList"}>
                     {children}
                 </div>
+            ),
+            componentItem:({name}) => (
+                <Card>
+                    <CardBody>
+                        {name}
+                    </CardBody>
+                </Card>
             ),
             fieldTypes: {
                 text: ({name, onChange, value}) => (
@@ -36,9 +61,10 @@ export function BuilderEditor() {
                         onChange={(e) => onChange(e.currentTarget.value as any)}
                     />
                 ),
-                select: ({field, name, onChange, value}:any) => (
-                    <Select label={name} selectedKeys={Array.isArray(value) ? value as any : [value]} onChange={(e) => onChange(e.target.value as any)}>
-                        {Array.isArray(field?.options) && field.options.map((item:any) => (
+                select: ({field, name, onChange, value}: any) => (
+                    <Select label={name} selectedKeys={Array.isArray(value) ? value as any : [value]}
+                            onChange={(e) => onChange(e.target.value as any)}>
+                        {Array.isArray(field?.options) && field.options.map((item: any) => (
                             <SelectItem key={item?.value}>{item?.label}</SelectItem>
                         ))}
                     </Select>
@@ -50,10 +76,10 @@ export function BuilderEditor() {
                         onChange={(e) => onChange(e.currentTarget.value as any)}
                     />
                 ),
-                radio: ({name, onChange, value, field}:any) => (
+                radio: ({name, onChange, value, field}: any) => (
                     <FieldLabel label={name}>
                         <Tabs selectedKey={value as any} onSelectionChange={onChange as any} fullWidth>
-                            {Array.isArray(field?.options) && field.options.map((item:any) => (
+                            {Array.isArray(field?.options) && field.options.map((item: any) => (
                                 <Tab key={item?.value} title={item?.label}/>
                             ))}
                         </Tabs>
@@ -71,7 +97,8 @@ export function BuilderEditor() {
                                         Usef Builder
                                     </h1>
                                 </div>
-                                <div className={"flex gap-2"}>
+                                <div className={"flex gap-2 items-center"}>
+                                    <BackForward/>
                                     <Button onClick={() => setIsSidebarLeft(!isSidebarLeft)} variant={"light"}
                                             isIconOnly size={"sm"}>
                                         <Icon className={"rotate-180"} icon={"solar:sidebar-minimalistic-broken"}
@@ -81,6 +108,7 @@ export function BuilderEditor() {
                                             isIconOnly size={"sm"}>
                                         <Icon icon={"solar:sidebar-minimalistic-broken"} fontSize={20}/>
                                     </Button>
+                                    <PublishButton/>
                                 </div>
                             </div>
                         </CardBody>

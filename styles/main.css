@@ -1,1 +1,4 @@
 @import "fonts/fontType.css";
+.customComponentsList > div > div >div{
+    @apply grid grid-cols-2 gap-2;
+}

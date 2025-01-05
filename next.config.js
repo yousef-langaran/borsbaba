@@ -4,7 +4,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  output: 'export'
+  output: 'export',
+  typescript:{
+    ignoreBuildErrors: true
+  }
 }
 
 module.exports = nextConfig
