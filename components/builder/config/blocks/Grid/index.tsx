@@ -29,9 +29,14 @@ export const Grid: ComponentConfig<GridProps> = {
         numColumns: 4,
         gap: 24,
     },
-    render: ({gap, numColumns}) => {
+    render: ({gap, numColumns, puck}) => {
         return (
             <Section>
+                <div style={puck.isEditing ? {} : {
+                    display: "grid",
+                    gap: gap,
+                    gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
+                }}>
                 <DropZone
                     className={getClassName()}
                     zone="grid"
@@ -42,6 +47,7 @@ export const Grid: ComponentConfig<GridProps> = {
                         gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
                     }}
                 ></DropZone>
+                </div>
             </Section>
         );
     },
