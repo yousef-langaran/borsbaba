@@ -2,11 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   typescript: {
-    ignoreBuildErrors: true,
-  },
-  output: 'export',
-  typescript:{
     ignoreBuildErrors: true
+  },
+  i18n: {
+    locales: ['fa'],
+    defaultLocale: 'fa',
+    localeDetection: true,
   }
 }
 

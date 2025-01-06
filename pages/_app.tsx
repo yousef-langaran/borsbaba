@@ -13,18 +13,23 @@ import 'swiper/css';
 import 'swiper/css/free-mode';
 import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
+import {I18nextProvider} from "react-i18next";
+import i18n from "@/plugins/i18n";
+
 export default function App({Component, pageProps}: AppProps) {
     const router = useRouter();
 
     return (
         <NextUIProvider navigate={router.push}>
             <NextThemesProvider>
-                <Provider store={store}>
-                    {
-                        // @ts-ignore
-                        <Component {...pageProps} />
-                    }
-                </Provider>
+                <I18nextProvider i18n={i18n}>
+                    <Provider store={store}>
+                        {
+                            // @ts-ignore
+                            <Component {...pageProps} />
+                        }
+                    </Provider>
+                </I18nextProvider>
             </NextThemesProvider>
         </NextUIProvider>
     );
