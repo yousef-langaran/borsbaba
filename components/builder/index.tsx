@@ -109,7 +109,7 @@ export function BuilderEditor({onPublish,initialData,isLoadingPublish}:BuilderEd
                                             isIconOnly size={"sm"}>
                                         <Icon icon={"solar:sidebar-minimalistic-broken"} fontSize={20}/>
                                     </Button>
-                                    <PublishButton onPublish={onPublish} iisLoading={isLoadingPublish}/>
+                                    <PublishButton onPublish={onPublish} isLoading={isLoadingPublish}/>
                                 </div>
                             </div>
                         </CardBody>
