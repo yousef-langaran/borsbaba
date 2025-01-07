@@ -1,4 +1,5 @@
 import {ProductApi, MenuApi, BasketApi, AddressApi, FactorApi} from './digimal/api'
+import {PageBuilderApi} from './admin/api'
 import {TokenAuthApi} from './main/api'
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -36,6 +37,7 @@ class UseApi {
     BasketApi = new BasketApi()
     AddressApi = new AddressApi()
     FactorApi = new FactorApi()
+    PageBuilderApi = new PageBuilderApi()
 }
 
 const api = new UseApi()

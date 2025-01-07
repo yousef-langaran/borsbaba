@@ -3,14 +3,19 @@ import "@measured/puck/puck.css";
 import {Input, Textarea} from "@nextui-org/input";
 import {Card, CardBody} from "@nextui-org/card";
 import {useState} from "react";
-import conf, {initialData} from "@/components/builder/config";
+import conf from "@/components/builder/config";
 import {Icon} from "@iconify/react";
 import {Button, Select, SelectItem, Tab, Tabs} from "@nextui-org/react";
 
-const PublishButton = () => {
+interface BuilderEditorProps {
+    onPublish?: (data:any) => void
+    initialData?: any,
+    isLoadingPublish?: boolean
+}
+const PublishButton = ({onPublish,isLoading}:any) => {
     const {appState} = usePuck();
     return (
-        <Button onClick={() => onPublish(appState)} color={"primary"}>
+        <Button isLoading={isLoading} onPress={() => onPublish(appState)} color={"primary"}>
             Publish
         </Button>
     )
@@ -30,14 +35,10 @@ const BackForward = () =>{
         </div>
     )
 }
-const onPublish = (data:any) => {
-    console.log(data)
-};
 
-export function BuilderEditor() {
+export function BuilderEditor({onPublish,initialData,isLoadingPublish}:BuilderEditorProps) {
     const [isSidebarLeft, setIsSidebarLeft] = useState(true)
     const [isSidebarRight, setIsSidebarRight] = useState(true)
-
 
     return (
         <Puck config={conf} data={initialData} overrides={{
@@ -99,16 +100,16 @@ export function BuilderEditor() {
                                 </div>
                                 <div className={"flex gap-2 items-center"}>
                                     <BackForward/>
-                                    <Button onClick={() => setIsSidebarLeft(!isSidebarLeft)} variant={"light"}
+                                    <Button onPress={() => setIsSidebarLeft(!isSidebarLeft)} variant={"light"}
                                             isIconOnly size={"sm"}>
                                         <Icon className={"rotate-180"} icon={"solar:sidebar-minimalistic-broken"}
                                               fontSize={20}/>
                                     </Button>
-                                    <Button onClick={() => setIsSidebarRight(!isSidebarRight)} variant={"light"}
+                                    <Button onPress={() => setIsSidebarRight(!isSidebarRight)} variant={"light"}
                                             isIconOnly size={"sm"}>
                                         <Icon icon={"solar:sidebar-minimalistic-broken"} fontSize={20}/>
                                     </Button>
-                                    <PublishButton/>
+                                    <PublishButton onPublish={onPublish} iisLoading={isLoadingPublish}/>
                                 </div>
                             </div>
                         </CardBody>

@@ -1,31 +1,32 @@
 import DefaultLayout from "@/layouts/default";
 import {Render} from "@measured/puck";
-import conf from "@/components/builder/config";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import api from "@/services/useApi";
+import conf from "@/components/builder/config";
+
 
 export default function IndexPage() {
     const router = useRouter()
     const [initialData, setInitialData] = useState({})
-    const [isLoadingFetch, setIsLoadingFetch] = useState(false)
-    const pageName = 'home'
+    const [isLoadingPublish, setIsLoadingPublish] = useState(false)
+    const pageName = router.query?.id?.toString()
     const fetchPageBuilder = async () => {
         try {
             if (pageName) {
-                setIsLoadingFetch(true)
+                setIsLoadingPublish(true)
                 const {data}: any = await api.PageBuilderApi.apiServicesAppPageBuilderGetByNameGet(pageName)
                 if (data.result) {
                     setInitialData(JSON.parse(data.result.jsonContent))
                 }
-                setIsLoadingFetch(false)
+                setIsLoadingPublish(false)
             }
         } catch (e) {
             console.error(e)
         }
     }
     useEffect(() => {
-        if (router.isReady) {
+        if (router.isReady){
             fetchPageBuilder()
         }
     }, [router]);
