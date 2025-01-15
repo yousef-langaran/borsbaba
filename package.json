@@ -14,7 +14,7 @@
 		"@capacitor/core": "^6.1.2",
 		"@emotion/react": "^11.14.0",
 		"@hookform/resolvers": "^3.9.1",
-		"@measured/puck": "^0.17.1",
+		"@measured/puck": "^0.17.3",
 		"@neshan-maps-platform/ol": "^1.0.5",
 		"@neshan-maps-platform/react-openlayers": "^2.0.16",
 		"@nextui-org/react": "^2.6.8",

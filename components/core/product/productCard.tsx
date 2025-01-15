@@ -15,7 +15,7 @@ export const ProductCard = (props: ProductCardProps) => {
                         isZoomed
                         alt={props.product?.persianName || ''}
                         src={props.product?.mediaList?.[0]?.allMedias?.[0]?.url || ''}
-                        className="aspect-square md:!w-full md:!max-w-full bg-blend-multiply w-36 min-w-36"
+                        className="aspect-square md:w-full md:max-w-full bg-blend-multiply md:h-full min-h-[118px] h-[118px] min-w-[118px] w-[118px]"
                         classNames={{wrapper: 'md:!w-full md:!max-w-full'}}
                     />
                     <div className={"grow"}>
