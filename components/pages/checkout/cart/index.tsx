@@ -65,7 +65,9 @@ export const PageCheckoutCart = (props: PageCheckoutCartProps) => {
                         </div>
                     </div>
                     :
-                    <></>
+                    <div className={"flex items-center justify-center"}>
+                        <p>سبد خرید شما خالی است.</p>
+                    </div>
             }
         </div>
     )
