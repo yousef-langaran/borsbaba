@@ -6,6 +6,7 @@ import {Listbox, ListboxItem} from "@nextui-org/listbox";
 import {AppDispatch, RootState} from "@/redux/store";
 import {useDispatch, useSelector} from "react-redux";
 import {logout} from "@/redux/reducers/auth";
+import {useRouter} from "next/router";
 
 interface ProfileProps {
     onLogin: () => void
@@ -37,12 +38,13 @@ export const Profile = (props: ProfileProps) => {
 }
 const LoginButton = (props: LoginButtonProps) => {
     return (
-        <Button variant="bordered" onClick={props.onLogin}>
+        <Button variant="bordered" onPress={props.onLogin}>
             ورود | ثبت نام
         </Button>
     )
 }
 const LoginAvatar = (props: LoginAvatarProps) => {
+    const router = useRouter()
     const dispatch: AppDispatch = useDispatch()
     return (
         <Popover placement="bottom-start">
@@ -54,9 +56,9 @@ const LoginAvatar = (props: LoginAvatarProps) => {
                     <Listbox
                         aria-label="Actions"
                     >
-                        <ListboxItem key="profile">پروفایل</ListboxItem>
+                        <ListboxItem key="profile" onPress={()=> router.push('/profile')}>پروفایل</ListboxItem>
                         <ListboxItem key="message">پیام ها</ListboxItem>
-                        <ListboxItem  key="logout" className="text-danger" color="danger" onClick={()=>dispatch(logout())}>
+                        <ListboxItem  key="logout" className="text-danger" color="danger" onPress={()=>dispatch(logout())}>
                             خروج از حساب کاربری
                         </ListboxItem>
                     </Listbox>

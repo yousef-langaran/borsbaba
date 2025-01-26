@@ -1,11 +1,11 @@
 import {PageProfile} from "@/components/pages/profile";
-import DefaultLayout from "@/layouts/default";
+import {LayoutProfile} from "@/components/layout/profile";
 
 
 export default function IndexPage() {
     return (
-        <DefaultLayout>
+        <LayoutProfile>
             <PageProfile/>
-        </DefaultLayout>
+        </LayoutProfile>
     );
 }
