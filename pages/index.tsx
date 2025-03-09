@@ -4,6 +4,8 @@ import conf from "@/components/builder/config";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import api from "@/services/useApi";
+import {Calendar} from "@nextui-org/react";
+import {I18nProvider} from "@react-aria/i18n";
 
 export default function IndexPage() {
     const router = useRouter()
@@ -31,6 +33,9 @@ export default function IndexPage() {
     }, [router]);
     return (
         <DefaultLayout>
+            <I18nProvider locale={"fa"}>
+                <Calendar showMonthAndYearPickers/>
+            </I18nProvider>
             <Render config={conf} data={initialData}/>
         </DefaultLayout>
     );

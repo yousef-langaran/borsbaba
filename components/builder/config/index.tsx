@@ -15,6 +15,7 @@ import {SliderImage} from "@/components/builder/config/blocks/SliderImage";
 import {WithLayout} from "@/components/builder/config/components/Layout";
 import {ImageProps} from "@nextui-org/react";
 import {Image} from "@/components/builder/config/blocks/Image";
+import {Slider} from "@/components/builder/config/blocks/Slider";
 
 export type { RootProps } from "./root";
 
@@ -64,7 +65,7 @@ export const conf: UserConfig = {
     },
     image: {
       title: "image",
-      components: ["SliderImage","Image"],
+      components: ["SliderImage","Image","Slider"],
     },
   },
   components: {
@@ -77,7 +78,8 @@ export const conf: UserConfig = {
     Text,
     Space,
     SliderImage,
-    Image
+    Image,
+    Slider
   },
 };
 

@@ -32,7 +32,7 @@ jobs:
             sudo -E git pull
             yarn install
             yarn build
-            pm2 stop digimal-react || true
-            pm2 delete digimal-react || true
-            pm2 start "yarn start -p 3000" --name "digimal-react"
+            pm2 stop promal || true
+            pm2 delete promal || true
+            pm2 start "yarn start" --name "promal"
           EOF

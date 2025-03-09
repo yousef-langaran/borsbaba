@@ -1,9 +1,7 @@
-import {Link} from "@nextui-org/link";
-
 import {Head} from "./head";
 
 import {Navbar} from "@/components/navbar";
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {checkToken} from "@/redux/reducers/auth";

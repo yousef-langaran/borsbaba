@@ -97,7 +97,7 @@ export const Footer = () => {
                     </div>
                 </div>
 
-                <div className="xl:grid xl:grid-cols-4 xl:gap-8">
+                <div className="md:grid md:grid-cols-4 md:gap-8">
                     <div>{renderList({title: "پرومال", items: footerNavigation.services})}</div>
                     <div className="mt-10 md:mt-0">
                         {renderList({title: "Support", items: footerNavigation.supportOptions})}
