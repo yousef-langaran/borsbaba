@@ -36,7 +36,7 @@ export default function IndexPage() {
             <I18nProvider locale={"fa"}>
                 <Calendar showMonthAndYearPickers/>
             </I18nProvider>
-            <Render config={conf} data={initialData}/>
+            {/*<Render config={conf} data={initialData}/>*/}
         </DefaultLayout>
     );
 }
