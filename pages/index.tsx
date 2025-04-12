@@ -33,10 +33,10 @@ export default function IndexPage() {
     }, [router]);
     return (
         <DefaultLayout>
-            <I18nProvider locale={"fa"}>
-                <Calendar showMonthAndYearPickers/>
-            </I18nProvider>
-            {/*<Render config={conf} data={initialData}/>*/}
+            {/*<I18nProvider locale={"fa"}>*/}
+            {/*    <Calendar showMonthAndYearPickers/>*/}
+            {/*</I18nProvider>*/}
+            <Render config={conf} data={initialData}/>
         </DefaultLayout>
     );
 }

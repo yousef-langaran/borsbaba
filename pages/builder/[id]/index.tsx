@@ -15,7 +15,6 @@ export default function IndexPage() {
                 setIsLoadingFetch(true)
                 const {data}: any = await api.PageBuilderApi.apiServicesAppPageBuilderGetByNameGet(pageName)
                 if (data.result) {
-                    console.log(JSON.parse(data.result.jsonContent))
                     setInitialData(JSON.parse(data.result.jsonContent))
                 }
                 setIsLoadingFetch(false)
