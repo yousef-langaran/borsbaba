@@ -1,42 +1,47 @@
+// pages/index.tsx
 import DefaultLayout from "@/layouts/default";
-import {Render} from "@measured/puck";
+import { Render } from "@measured/puck";
 import conf from "@/components/builder/config";
-import {useRouter} from "next/router";
-import {useEffect, useState} from "react";
 import api from "@/services/useApi";
-import {Calendar} from "@nextui-org/react";
-import {I18nProvider} from "@react-aria/i18n";
+import Head from "next/head";
 
-export default function IndexPage() {
-    const router = useRouter()
-    const [initialData, setInitialData] = useState({})
-    const [isLoadingFetch, setIsLoadingFetch] = useState(false)
-    const pageName = 'home'
-    const fetchPageBuilder = async () => {
-        try {
-            if (pageName) {
-                setIsLoadingFetch(true)
-                const {data}: any = await api.PageBuilderApi.apiServicesAppPageBuilderGetByNameGet(pageName)
-                if (data.result) {
-                    setInitialData(JSON.parse(data.result.jsonContent))
-                }
-                setIsLoadingFetch(false)
-            }
-        } catch (e) {
-            console.error(e)
-        }
-    }
-    useEffect(() => {
-        if (router.isReady) {
-            fetchPageBuilder()
-        }
-    }, [router]);
+type Props = {
+    initialData: any;
+};
+
+export default function IndexPage({ initialData }: Props) {
     return (
         <DefaultLayout>
-            {/*<I18nProvider locale={"fa"}>*/}
-            {/*    <Calendar showMonthAndYearPickers/>*/}
-            {/*</I18nProvider>*/}
-            <Render config={conf} data={initialData}/>
+            <Head>
+                <title>عنوان صفحه – وب‌سایت من</title>
+                <meta name="description" content="توضیحات صفحه برای موتورهای جستجو…" />
+                {/* بقیه متا تگ‌ها / Open Graph */}
+            </Head>
+
+            {/* چون initialData از سرور رسیده، Render خروجی‌اش در HTML اولیه قرار می‌گیرد */}
+            <Render config={conf} data={initialData} />
         </DefaultLayout>
     );
+}
+
+export async function getServerSideProps(context: any) {
+    try {
+        const pageName = "home";
+        const { data }: any = await api.PageBuilderApi.apiServicesAppPageBuilderGetByNameGet(pageName);
+        const initialData = data.result
+            ? JSON.parse(data.result.jsonContent)
+            : {};
+        return {
+            props: {
+                initialData,
+            },
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            props: {
+                initialData: {},
+            },
+        };
+    }
 }
