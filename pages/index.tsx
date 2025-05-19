@@ -4,6 +4,7 @@ import { Render } from "@measured/puck";
 import conf from "@/components/builder/config";
 import api from "@/services/useApi";
 import Head from "next/head";
+import {RenderBuilder} from "@/components/builder/renderBuilder";
 
 type Props = {
     initialData: any;
@@ -19,7 +20,7 @@ export default function IndexPage({ initialData }: Props) {
             </Head>
 
             {/* چون initialData از سرور رسیده، Render خروجی‌اش در HTML اولیه قرار می‌گیرد */}
-            <Render config={conf} data={initialData} />
+            <RenderBuilder initialData={initialData} />
         </DefaultLayout>
     );
 }

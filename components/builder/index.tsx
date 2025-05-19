@@ -70,7 +70,7 @@ export function BuilderEditor({onPublish, initialData, isLoadingPublish}: Builde
         const curBp = breakpoints[currentBpIndex];
         setStatesByBp((p) => ({
             ...p,
-            [curBp.width]: form,
+            [curBp.width]: form.data,
         }));
         // بعد شات نهایی رو بفرست:
         const payload = {
@@ -78,7 +78,7 @@ export function BuilderEditor({onPublish, initialData, isLoadingPublish}: Builde
             pages: {
                 // pages[width] = stateJson
                 ...statesByBp,
-                [curBp.width]: form,
+                [curBp.width]: form.data,
             },
         };
         onPublish?.(payload);
@@ -104,7 +104,7 @@ export function BuilderEditor({onPublish, initialData, isLoadingPublish}: Builde
     };
     return (
         <>
-            <Puck config={conf} data={statesByBp[breakpoints[currentBpIndex].width] || initialData || {}} overrides={{
+            <Puck key={currentBpIndex} config={conf} data={statesByBp[breakpoints[currentBpIndex].width]} overrides={{
                 components: ({children}) => (
                     <div className={"customComponentsList"}>
                         {children}

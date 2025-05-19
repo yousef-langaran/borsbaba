@@ -27,10 +27,11 @@ export default function IndexPage() {
         try {
             if (pageName) {
                 setIsLoadingPublish(true)
+                console.log(json)
                 const {data} = await api.PageBuilderApi.apiServicesAppPageBuilderAddPost(
                     {
                         name: pageName.toString(),
-                        jsonContent: JSON.stringify(json.data)
+                        jsonContent: JSON.stringify(json)
                     }
                 )
                 setIsLoadingPublish(false)
