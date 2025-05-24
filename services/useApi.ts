@@ -28,6 +28,15 @@ class UseApi {
             }
             return response;
         }, function (error) {
+            if (error.response && error.response.status === 401) {
+                // مسیر فعلی
+                let current = window.location.pathname + window.location.search;
+                // ریدایرکت به لاگین با پارامتر redirect
+                window.location.href = `/auth/login?redirect=${encodeURIComponent(current)}`;
+
+                // اگر نیاز داری توکن رو هم پاک کنی:
+                Cookies.remove('token');
+            }
             return Promise.reject(error);
         });
     }

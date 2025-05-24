@@ -23,6 +23,8 @@ export const PagesLogin = (props: PagesLoginProps) => {
     const [username, setUsername] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const redirect = typeof router.query.redirect === "string" ? router.query.redirect : "/";
+
     const onSetUser = (username: string) => {
         setUsername(username);
         setIsSignInType(1);
@@ -35,7 +37,10 @@ export const PagesLogin = (props: PagesLoginProps) => {
             password: password,
         });
         dispatch(login(data.result.accessToken));
-        router.push('/');
+
+        // === استفاده از redirect ===
+        router.push(redirect);
+
         setIsLoading(false);
     };
 
@@ -47,6 +52,12 @@ export const PagesLogin = (props: PagesLoginProps) => {
         }
     };
 
+    useEffect(() => {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        if (token) {
+            router.replace(redirect);
+        }
+    }, [redirect, router]);
     return (
         <div className="h-screen w-screen flex items-center justify-center">
             <motion.div
