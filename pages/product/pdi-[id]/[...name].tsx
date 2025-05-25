@@ -119,8 +119,13 @@ export default function IndexPage() {
                     </div>
                 }
                 {!!product.specifications?.length &&
-                    <div>
+                    <div className={"flex gap-4"}>
+                        <div className={"grow"}>
                         <Specifications specifications={product.specifications}/>
+                        </div>
+                        <div className={"w-96 md:grid hidden h-fit top-36 sticky"}>
+                            <ResellerInformation resellers={getResellers}/>
+                        </div>
                     </div>
                 }
             </div>

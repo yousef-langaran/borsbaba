@@ -20,7 +20,7 @@ export const ResellerInformation = (props: ResellerInformationProps) => {
         <Card
             className="md:shadow-medium shadow-none">
             <CardHeader>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center w-full">
                     <h3 className="font-bold">فروشنده</h3>
                     <Link className="text-sm">{props.resellers?.length} فروشنده دیگر</Link>
                 </div>

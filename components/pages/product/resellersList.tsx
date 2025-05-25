@@ -2,21 +2,31 @@ import {CoreTitle} from "@/components/core/title";
 import {GetResellerInfoResult} from "@/services/digimal";
 import {Button} from "@nextui-org/button";
 import {Icon} from "@iconify/react";
-import {Divider,Image} from "@nextui-org/react";
+import {Divider, Image} from "@nextui-org/react";
 import {ShowPrice} from "@/components/core/price/showPrice";
 import {AddBasketButton} from "@/components/core/basket/addBasketButton";
+import {useMemo} from "react";
+import _ from "lodash";
 
 interface ResellersListProps {
     resellers?: Array<GetResellerInfoResult>,
 }
 
 export const ResellersList = ({resellers}: ResellersListProps) => {
+    const resellersList = useMemo(() => {
+        // پیدا کردن کمترین مقدار
+        const minItem = _.minBy(resellers, 'b2CPrice');
+        // برگشت دادن لیستی که آن آیتم را حذف کرده است
+        return resellers.filter(item => item !== minItem);
+    }, [resellers]);
     return (
         <>
-            <CoreTitle title="فروشندگان این کالا" tag="p"/>
-            {!!resellers && resellers.map((reseller,index) => (
+            {(!!resellersList && !!resellersList?.length) &&
+                <CoreTitle title="فروشندگان این کالا" tag="p"/>
+            }
+            {!!resellersList && resellersList.map((reseller, index) => (
                 <div key={index}
-                    className="odd:bg-gray-100 flex flex-col divide-y divide-slate-200 p-4 lg:flex-row lg:justify-between lg:divide-y-0">
+                     className="odd:bg-gray-100 flex flex-col divide-y divide-slate-200 p-4 lg:flex-row lg:justify-between lg:divide-y-0">
                     <div className="flex gap-2 items-center py-4">
                         {/*<Image src=""/>*/}
                         <div className="flex-grow">
