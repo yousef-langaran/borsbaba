@@ -9,7 +9,7 @@ import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
 import {Input} from "@nextui-org/input";
 import {fetch} from "next/dist/compiled/@edge-runtime/primitives";
 import axios from "axios";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useRouter} from "next/router";
 
 type Props = {
@@ -90,46 +90,56 @@ export default function IndexPage({initialData}: Props) {
 
         return () => clearInterval(intervalId);
     }, [valueSell]);
+
+    const calcSell = useMemo(() => {
+        const value = (priceSell - nowPriceSell?.pDrCotVal) * countSell;
+        return isNaN(value) ? 'نامعتبر' : value.toLocaleString();
+    }, [priceSell, nowPriceSell?.pDrCotVal, countSell]);
+    const calcBuy = useMemo(() => {
+        const value = (priceBuy - nowPriceBuy?.pDrCotVal) * countBuy;
+        return isNaN(value) ? 'نامعتبر' : value.toLocaleString();
+    }, [priceBuy, nowPriceBuy?.pDrCotVal, countBuy]);
     return (
-        <DefaultLayout>
-            <Head>
-                <title>عنوان صفحه – وب‌سایت من</title>
-                <meta name="description" content="توضیحات صفحه برای موتورهای جستجو…"/>
-                {/* بقیه متا تگ‌ها / Open Graph */}
-            </Head>
-
-            {/* چون initialData از سرور رسیده، Render خروجی‌اش در HTML اولیه قرار می‌گیرد */}
-            {/*<RenderBuilder initialData={initialData} />*/}
-
-            <div className={"flex w-full"}>
-                <div className={'bg-success p-4 w-full'}>
-                    <p className={"text-5xl text-center"}>خرید</p>
-                    <div className={"flex gap-4"}>
-                        <Autocomplete label={"نماد"} onInputChange={setInputBuy} isLoading={loadingBuy} onSelectionChange={setValueBuy}>
-                            {symbolBuy.map(item => (
-                                <AutocompleteItem key={item?.insCode}>{item?.lVal18AFC}</AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                        <Input onValueChange={setPriceBuy} type={"number"} label={"قیمت"}/>
-                        <Input onValueChange={setCountBuy} type={"number"} label={"تعداد"}/>
-                    </div>
-                    <p className={"text-9xl text-center"}>{((nowPriceBuy?.pDrCotVal - priceBuy) * countBuy)?.toLocaleString()}</p>
+        // <DefaultLayout>
+        //     <Head>
+        //         <title>عنوان صفحه – وب‌سایت من</title>
+        //         <meta name="description" content="توضیحات صفحه برای موتورهای جستجو…"/>
+        //         {/* بقیه متا تگ‌ها / Open Graph */}
+        //     </Head>
+        //
+        //     {/* چون initialData از سرور رسیده، Render خروجی‌اش در HTML اولیه قرار می‌گیرد */}
+        //     {/*<RenderBuilder initialData={initialData} />*/}
+        //
+        //
+        // </DefaultLayout>
+        <div className={"w-full flex md:flex-row flex-col"}>
+            <div className={'bg-success p-4 w-full'}>
+                <p className={"md:text-5xl text-xl text-center"}>خرید</p>
+                <div className={"flex gap-4 md:flex-row flex-col"}>
+                    <Autocomplete label={"نماد"} onInputChange={setInputBuy} isLoading={loadingBuy} onSelectionChange={setValueBuy}>
+                        {symbolBuy.map(item => (
+                            <AutocompleteItem key={item?.insCode}>{item?.lVal18AFC}</AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                    <Input onValueChange={setPriceBuy} type={"number"} label={"قیمت"}/>
+                    <Input onValueChange={setCountBuy} type={"number"} label={"تعداد"}/>
                 </div>
-                <div className={'bg-danger p-4 w-full'}>
-                    <p className={"text-5xl text-center"}>فروش</p>
-                    <div className={"flex gap-4"}>
-                        <Autocomplete label={"نماد"} onInputChange={setInputSell} isLoading={loadingSell} onSelectionChange={setValueSell}>
-                            {symbolSell.map(item => (
-                                <AutocompleteItem key={item?.insCode}>{item?.lVal18AFC}</AutocompleteItem>
-                            ))}
-                        </Autocomplete>
-                        <Input onValueChange={setPriceSell} type={"number"} label={"قیمت"}/>
-                        <Input onValueChange={setCountSell} type={"number"} label={"تعداد"}/>
-                    </div>
-                    <p className={"text-9xl text-center"}>{((priceSell - nowPriceSell?.pDrCotVal) * countSell)?.toLocaleString()}</p>
-                </div>
+                <p className={"md:text-9xl text-2xl text-center"}>{calcBuy}</p>
             </div>
-        </DefaultLayout>
+            <div className={'bg-danger p-4 w-full'}>
+                <p className={"md:text-5xl text-xl text-center"}>فروش</p>
+                <div className={"flex gap-4 md:flex-row flex-col"}>
+                    <Autocomplete label={"نماد"} onInputChange={setInputSell} isLoading={loadingSell} onSelectionChange={setValueSell}>
+                        {symbolSell.map(item => (
+                            <AutocompleteItem key={item?.insCode}>{item?.lVal18AFC}</AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                    <Input onValueChange={setPriceSell} type={"number"} label={"قیمت"}/>
+                    <Input onValueChange={setCountSell} type={"number"} label={"تعداد"}/>
+                </div>
+                <p className={"md:text-9xl text-2xl text-center"}>{calcSell}</p>
+            </div>
+        </div>
     );
 }
 
