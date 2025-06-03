@@ -1,166 +1,236 @@
-// pages/index.tsx
-import DefaultLayout from "@/layouts/default";
-import {Render} from "@measured/puck";
-import conf from "@/components/builder/config";
-import api from "@/services/useApi";
-import Head from "next/head";
-import {RenderBuilder} from "@/components/builder/renderBuilder";
-import {Autocomplete, AutocompleteItem} from "@nextui-org/react";
-import {Input} from "@nextui-org/input";
-import {fetch} from "next/dist/compiled/@edge-runtime/primitives";
-import axios from "axios";
-import {useEffect, useMemo, useState} from "react";
-import {useRouter} from "next/router";
+import {useEffect, useState, useMemo} from 'react';
+import axios from 'axios';
+import {Autocomplete, AutocompleteItem} from '@nextui-org/react';
+import {Input} from '@nextui-org/input';
 
-type Props = {
-    initialData: any;
+type SymbolItem = {
+    insCode: number;
+    lVal18AFC: string;
 };
 
-export default function IndexPage({initialData}: Props) {
-    const router = useRouter()
-    const [inputSell, setInputSell] = useState('')
-    const [loadingSell, setLoadingSell] = useState(false)
-    const [symbolSell, setSymbolSell] = useState([])
-    const [valueSell, setValueSell] = useState()
-    const [nowPriceSell, setNowPriceSell] = useState({})
-    const [countSell, setCountSell] = useState(0)
-    const [priceSell, setPriceSell] = useState(0)
+type TradeItem = {
+    symbolInput: string;
+    loading: boolean;
+    options: SymbolItem[];
+    selected: number | null;
+    nowPrice: any; // می‌تونی تایپ دقیق بزنی
+    price: number;
+    count: number;
+};
 
-    const [inputBuy, setInputBuy] = useState('')
-    const [loadingBuy, setLoadingBuy] = useState(false)
-    const [symbolBuy, setSymbolBuy] = useState([])
-    const [valueBuy, setValueBuy] = useState()
-    const [nowPriceBuy, setNowPriceBuy] = useState({})
-    const [countBuy, setCountBuy] = useState(0)
-    const [priceBuy, setPriceBuy] = useState(0)
+const emptyTradeItem = (): TradeItem => ({
+    symbolInput: '',
+    loading: false,
+    options: [],
+    selected: null,
+    nowPrice: {},
+    price: 0,
+    count: 0,
+});
+
+export default function IndexPage() {
+    // لیست خرید و فروش
+    const [buyList, setBuyList] = useState<TradeItem[]>([emptyTradeItem()]);
+    const [sellList, setSellList] = useState<TradeItem[]>([emptyTradeItem()]);
+
+    // توابع بخش خرید
+    const handleBuyInputChange = (idx: number, field: keyof TradeItem, value: any) => {
+        setBuyList(list =>
+            list.map((item, i) => (i === idx ? {...item, [field]: value} : item))
+        );
+    };
+
+    const addBuyRow = () => setBuyList(list => [...list, emptyTradeItem()]);
+    const removeBuyRow = (idx: number) =>
+        setBuyList(list => list.length > 1 ? list.filter((_, i) => i !== idx) : list);
+
+    // توابع بخش فروش
+    const handleSellInputChange = (idx: number, field: keyof TradeItem, value: any) => {
+        setSellList(list =>
+            list.map((item, i) => (i === idx ? {...item, [field]: value} : item))
+        );
+    };
+
+    const addSellRow = () => setSellList(list => [...list, emptyTradeItem()]);
+    const removeSellRow = (idx: number) =>
+        setSellList(list => list.length > 1 ? list.filter((_, i) => i !== idx) : list);
+
+    // گرفتن لیست نمادها
     const fetchAllSymboles = async (symbol: string = '') => {
         try {
             const res = await axios.get(`/api/tsetmc?symbol=${encodeURIComponent(symbol)}`);
-            return res.data?.instrumentSearch
+            return res.data?.instrumentSearch || [];
         } catch (e) {
-            console.error(e);
+            return [];
         }
     };
+
+    // گرفتن جزییات قیمت هر نماد
     const fetchDetailsSymboles = async (symbol: number) => {
         try {
             const res = await axios.get(`/api/tsetmcDetails?symbol=${encodeURIComponent(symbol)}`);
-            return res.data?.closingPriceInfo
+            return res.data?.closingPriceInfo || {};
         } catch (e) {
-            console.error(e);
+            return {};
         }
     };
 
+    // useEffect برای جستجوی نمادها (خرید)
     useEffect(() => {
-        if (inputSell) {
-            (async () => {
-                setLoadingSell(true)
-                setSymbolSell(await fetchAllSymboles(inputSell));
-                setLoadingSell(false)
-            })();
-        }
-    }, [inputSell]);
+        buyList.forEach((item, idx) => {
+            if (item.symbolInput) {
+                handleBuyInputChange(idx, 'loading', true);
+                fetchAllSymboles(item.symbolInput).then(data => {
+                    handleBuyInputChange(idx, 'options', data);
+                    handleBuyInputChange(idx, 'loading', false);
+                });
+            } else {
+                handleBuyInputChange(idx, 'options', []);
+            }
+        });
+        // فقط روی تغییر symbolInput اقدام می‌کنیم
+        // eslint-disable-next-line
+    }, [buyList.map(i => i.symbolInput).join(',')]);
 
+    // useEffect لیوآپدیت قیمت‌ها (خرید)
     useEffect(() => {
-        if (inputBuy) {
-            (async () => {
-                setLoadingBuy(true)
-                setSymbolBuy(await fetchAllSymboles(inputBuy));
-                setLoadingBuy(false)
-            })();
-        }
-    }, [inputBuy]);
+        let timers: NodeJS.Timeout[] = [];
+        buyList.forEach((item, idx) => {
+            if (item.selected) {
+                const update = async () => {
+                    const price = await fetchDetailsSymboles(item.selected as number);
+                    handleBuyInputChange(idx, 'nowPrice', price);
+                };
+                update(); // موقع انتخاب سریع بقیشو بیار
+                const t = setInterval(update, 2000);
+                timers.push(t);
+            }
+        });
+        return () => timers.forEach(clearInterval);
+        // eslint-disable-next-line
+    }, [buyList.map(i => i.selected).join(',')]);
 
+    // useEffect جستجوی نمادها (فروش)
     useEffect(() => {
-        if (!valueBuy) return;
+        sellList.forEach((item, idx) => {
+            if (item.symbolInput) {
+                handleSellInputChange(idx, 'loading', true);
+                fetchAllSymboles(item.symbolInput).then(data => {
+                    handleSellInputChange(idx, 'options', data);
+                    handleSellInputChange(idx, 'loading', false);
+                });
+            } else {
+                handleSellInputChange(idx, 'options', []);
+            }
+        });
+        // eslint-disable-next-line
+    }, [sellList.map(i => i.symbolInput).join(',')]);
 
-        let intervalId = setInterval(() => {
-            fetchDetailsSymboles(valueBuy).then(setNowPriceBuy);
-        }, 2000);
-
-        // پاکسازی تایمر موقع تغییر valueBuy یا Unmount
-        return () => clearInterval(intervalId);
-    }, [valueBuy]);
-
+    // useEffect لیوآپدیت قیمت‌ها (فروش)
     useEffect(() => {
-        if (!valueSell) return;
+        let timers: NodeJS.Timeout[] = [];
+        sellList.forEach((item, idx) => {
+            if (item.selected) {
+                const update = async () => {
+                    const price = await fetchDetailsSymboles(item.selected as number);
+                    handleSellInputChange(idx, 'nowPrice', price);
+                };
+                update();
+                const t = setInterval(update, 2000);
+                timers.push(t);
+            }
+        });
+        return () => timers.forEach(clearInterval);
+        // eslint-disable-next-line
+    }, [sellList.map(i => i.selected).join(',')]);
 
-        let intervalId = setInterval(() => {
-            fetchDetailsSymboles(valueSell).then(setNowPriceSell);
-        }, 2000);
+    // سود خرید
+    const calcBuy = useMemo(() =>
+        buyList.reduce((acc, item) => {
+            const currentPrice = item.nowPrice?.pDrCotVal ?? 0;
+            const profit = (currentPrice - item.price) * item.count * 1000;
+            return acc + (isNaN(profit) ? 0 : profit);
+        }, 0), [buyList]);
 
-        return () => clearInterval(intervalId);
-    }, [valueSell]);
+    // سود فروش
+    const calcSell = useMemo(() =>
+        sellList.reduce((acc, item) => {
+            const currentPrice = item.nowPrice?.pDrCotVal ?? 0;
+            const profit = (currentPrice - item.price) * item.count * 1000;
+            return acc + (isNaN(profit) ? 0 : profit);
+        }, 0), [sellList]);
 
-    const calcSell = useMemo(() => {
-        const value = (priceSell - nowPriceSell?.pDrCotVal) * countSell;
-        return isNaN(value) ? 'نامعتبر' : value.toLocaleString();
-    }, [priceSell, nowPriceSell?.pDrCotVal, countSell]);
-    const calcBuy = useMemo(() => {
-        const value = (priceBuy - nowPriceBuy?.pDrCotVal) * countBuy;
-        return isNaN(value) ? 'نامعتبر' : value.toLocaleString();
-    }, [priceBuy, nowPriceBuy?.pDrCotVal, countBuy]);
+    // سود کل
+    const totalProfit = calcBuy + calcSell;
+
+    // رندر هر ردیف خرید/فروش
+    const renderTradeRow = (
+        list: TradeItem[],
+        handleInputChange: (idx: number, field: keyof TradeItem, value: any) => void,
+        removeRow: (idx: number) => void,
+        type: 'buy' | 'sell'
+    ) => list.map((item, idx) => (
+        <div key={idx} className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
+            <Autocomplete
+                label={"نماد"}
+                onInputChange={val => handleInputChange(idx, 'symbolInput', val)}
+                isLoading={item.loading}
+                onSelectionChange={val => handleInputChange(idx, 'selected', val)}
+                selectedKey={item.selected?.toString()}
+            >
+                {item.options.map(opt => (
+                    <AutocompleteItem key={opt.insCode}>{opt.lVal18AFC}</AutocompleteItem>
+                ))}
+            </Autocomplete>
+            <Input
+                onValueChange={val => handleInputChange(idx, 'price', Number(val))}
+                type={"number"}
+                label={"قیمت"}
+                value={item.price ? String(item.price) : ''}
+            />
+            <Input
+                onValueChange={val => handleInputChange(idx, 'count', Number(val))}
+                type={"number"}
+                label={"تعداد"}
+                value={item.count ? String(item.count) : ''}
+            />
+            <span className={`text-xs ${type === 'buy' ? 'text-green-600' : 'text-red-600'}`}>
+        قیمت لحظه‌ای: {mounted ? (item.nowPrice?.pDrCotVal || 0).toLocaleString() : ''}
+      </span>
+            {(list.length > 1) && (
+                <button onClick={() => removeRow(idx)} className="text-xs text-red-700 px-2 py-1">حذف</button>
+            )}
+        </div>
+    ));
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     return (
-        // <DefaultLayout>
-        //     <Head>
-        //         <title>عنوان صفحه – وب‌سایت من</title>
-        //         <meta name="description" content="توضیحات صفحه برای موتورهای جستجو…"/>
-        //         {/* بقیه متا تگ‌ها / Open Graph */}
-        //     </Head>
-        //
-        //     {/* چون initialData از سرور رسیده، Render خروجی‌اش در HTML اولیه قرار می‌گیرد */}
-        //     {/*<RenderBuilder initialData={initialData} />*/}
-        //
-        //
-        // </DefaultLayout>
-        <div className={"w-full flex md:flex-row flex-col"}>
-            <div className={'bg-success p-4 w-full'}>
-                <p className={"md:text-5xl text-xl text-center"}>خرید</p>
-                <div className={"flex gap-4 md:flex-row flex-col"}>
-                    <Autocomplete label={"نماد"} onInputChange={setInputBuy} isLoading={loadingBuy} onSelectionChange={setValueBuy}>
-                        {symbolBuy.map(item => (
-                            <AutocompleteItem key={item?.insCode}>{item?.lVal18AFC}</AutocompleteItem>
-                        ))}
-                    </Autocomplete>
-                    <Input onValueChange={setPriceBuy} type={"number"} label={"قیمت"}/>
-                    <Input onValueChange={setCountBuy} type={"number"} label={"تعداد"}/>
+        <div>
+            <p className={`md:text-9xl text-2xl text-center mt-3 ${+totalProfit > 0 ? 'text-success' : 'text-danger'}`}>{totalProfit}</p>
+            <div className={"w-full flex md:flex-row flex-col"}>
+                <div className={'border-4 border-success p-4 w-full'}>
+                    <p className={"md:text-5xl text-xl text-center"}>خرید</p>
+                    {renderTradeRow(buyList, handleBuyInputChange, removeBuyRow, 'buy')}
+                    <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuyRow}>اضافه ردیف
+                    </button>
+                    <p className={`md:text-9xl text-2xl text-center mt-3 ${+calcBuy > 0 ? 'text-success' : 'text-danger'}`}>
+                        {mounted
+                            ? (isNaN(calcBuy) ? 'نامعتبر' : calcBuy.toLocaleString())
+                            : ''}
+                    </p>
                 </div>
-                <p className={"md:text-9xl text-2xl text-center"}>{calcBuy}</p>
-            </div>
-            <div className={'bg-danger p-4 w-full'}>
-                <p className={"md:text-5xl text-xl text-center"}>فروش</p>
-                <div className={"flex gap-4 md:flex-row flex-col"}>
-                    <Autocomplete label={"نماد"} onInputChange={setInputSell} isLoading={loadingSell} onSelectionChange={setValueSell}>
-                        {symbolSell.map(item => (
-                            <AutocompleteItem key={item?.insCode}>{item?.lVal18AFC}</AutocompleteItem>
-                        ))}
-                    </Autocomplete>
-                    <Input onValueChange={setPriceSell} type={"number"} label={"قیمت"}/>
-                    <Input onValueChange={setCountSell} type={"number"} label={"تعداد"}/>
+                <div className={'border-4 border-danger p-4 w-full'}>
+                    <p className={"md:text-5xl text-xl text-center"}>فروش</p>
+                    {renderTradeRow(sellList, handleSellInputChange, removeSellRow, 'sell')}
+                    <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSellRow}>اضافه ردیف
+                    </button>
+                    <p className={`md:text-9xl text-2xl text-center mt-3 ${+calcSell > 0 ? 'text-success' : 'text-danger'}`}>
+                        {mounted ? isNaN(calcSell) ? 'نامعتبر' : calcSell.toLocaleString() : ''}
+                    </p>
                 </div>
-                <p className={"md:text-9xl text-2xl text-center"}>{calcSell}</p>
             </div>
         </div>
     );
-}
-
-export async function getServerSideProps(context: any) {
-    try {
-        const pageName = "home";
-        const {data}: any = await api.PageBuilderApi.apiServicesAppPageBuilderGetByNameGet(pageName);
-        const initialData = data.result
-            ? JSON.parse(data.result.jsonContent)
-            : {};
-        return {
-            props: {
-                initialData,
-            },
-        };
-    } catch (error) {
-        console.error(error);
-        return {
-            props: {
-                initialData: {},
-            },
-        };
-    }
 }
