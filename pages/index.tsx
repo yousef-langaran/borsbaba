@@ -156,7 +156,7 @@ export default function IndexPage() {
     const calcSell = useMemo(() =>
         sellList.reduce((acc, item) => {
             const currentPrice = item.nowPrice?.pDrCotVal ?? 0;
-            const profit = (currentPrice - item.price) * item.count * 1000;
+            const profit = (item.price - currentPrice) * item.count * 1000;
             return acc + (isNaN(profit) ? 0 : profit);
         }, 0), [sellList]);
 
