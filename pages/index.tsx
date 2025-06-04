@@ -169,53 +169,64 @@ export default function IndexPage() {
         handleInputChange: (idx: number, field: keyof TradeItem, value: any) => void,
         removeRow: (idx: number) => void,
         type: 'buy' | 'sell'
-    ) => list.map((item, idx) => (
-        <div key={idx} className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
-            <Autocomplete
-                label={"نماد"}
-                onInputChange={val => handleInputChange(idx, 'symbolInput', val)}
-                isLoading={item.loading}
-                onSelectionChange={val => handleInputChange(idx, 'selected', val)}
-                selectedKey={item.selected?.toString()}
-            >
-                {item.options.map(opt => (
-                    <AutocompleteItem key={opt.insCode}>{opt.lVal18AFC}</AutocompleteItem>
-                ))}
-            </Autocomplete>
-            <Input
-                onValueChange={val => handleInputChange(idx, 'price', Number(val))}
-                type={"number"}
-                label={"قیمت"}
-                value={item.price ? String(item.price) : ''}
-            />
-            <Input
-                onValueChange={val => handleInputChange(idx, 'count', Number(val))}
-                type={"number"}
-                label={"تعداد"}
-                value={item.count ? String(item.count) : ''}
-            />
-            <span className={`text-xs ${type === 'buy' ? 'text-green-600' : 'text-red-600'}`}>
+    ) => list.map((item, idx) => {
+        const rowProfit =
+            type === 'buy'
+                ? ((item.nowPrice?.pDrCotVal ?? 0) - item.price) * item.count * 1000
+                : (item.price - (item.nowPrice?.pDrCotVal ?? 0)) * item.count * 1000;
+        return (
+            <div key={idx}>
+                <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
+                    <Autocomplete
+                        label={"نماد"}
+                        onInputChange={val => handleInputChange(idx, 'symbolInput', val)}
+                        isLoading={item.loading}
+                        onSelectionChange={val => handleInputChange(idx, 'selected', val)}
+                        selectedKey={item.selected?.toString()}
+                    >
+                        {item.options.map(opt => (
+                            <AutocompleteItem key={opt.insCode}>{opt.lVal18AFC}</AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                    <Input
+                        onValueChange={val => handleInputChange(idx, 'price', Number(val))}
+                        type={"number"}
+                        label={"قیمت"}
+                        value={item.price ? String(item.price) : ''}
+                    />
+                    <Input
+                        onValueChange={val => handleInputChange(idx, 'count', Number(val))}
+                        type={"number"}
+                        label={"تعداد"}
+                        value={item.count ? String(item.count) : ''}
+                    />
+                    <span className={`text-xs ${type === 'buy' ? 'text-success' : 'text-danger'}`}>
         قیمت لحظه‌ای: {mounted ? (item.nowPrice?.pDrCotVal || 0).toLocaleString() : ''}
       </span>
-            {(list.length > 1) && (
-                <button onClick={() => removeRow(idx)} className="text-xs text-red-700 px-2 py-1">حذف</button>
-            )}
-        </div>
-    ));
+                    {(list.length > 1) && (
+                        <button onClick={() => removeRow(idx)} className="text-xs text-red-700 px-2 py-1">حذف</button>
+                    )}
+                </div>
+                <div className={`md:text-2xl block mt-1 ${+rowProfit > 0 ? 'text-success' : 'text-danger'}`}>
+                    سود این ردیف: {mounted ? (isNaN(rowProfit) ? 'نامعتبر' : rowProfit.toLocaleString()) : ''}
+                </div>
+            </div>
+        )
+    });
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
         setMounted(true);
     }, []);
     return (
         <div>
-            <p className={`md:text-9xl text-2xl text-center mt-3 ${+totalProfit > 0 ? 'text-success' : 'text-danger'}`}>{totalProfit}</p>
+            <p className={`md:text-5xl text-2xl text-center mt-3 ${+totalProfit > 0 ? 'text-success' : 'text-danger'}`}>{totalProfit?.toLocaleString()}</p>
             <div className={"w-full flex md:flex-row flex-col"}>
                 <div className={'border-4 border-success p-4 w-full'}>
                     <p className={"md:text-5xl text-xl text-center"}>خرید</p>
                     {renderTradeRow(buyList, handleBuyInputChange, removeBuyRow, 'buy')}
                     <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuyRow}>اضافه ردیف
                     </button>
-                    <p className={`md:text-9xl text-2xl text-center mt-3 ${+calcBuy > 0 ? 'text-success' : 'text-danger'}`}>
+                    <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcBuy > 0 ? 'text-success' : 'text-danger'}`}>
                         {mounted
                             ? (isNaN(calcBuy) ? 'نامعتبر' : calcBuy.toLocaleString())
                             : ''}
@@ -226,7 +237,7 @@ export default function IndexPage() {
                     {renderTradeRow(sellList, handleSellInputChange, removeSellRow, 'sell')}
                     <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSellRow}>اضافه ردیف
                     </button>
-                    <p className={`md:text-9xl text-2xl text-center mt-3 ${+calcSell > 0 ? 'text-success' : 'text-danger'}`}>
+                    <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcSell > 0 ? 'text-success' : 'text-danger'}`}>
                         {mounted ? isNaN(calcSell) ? 'نامعتبر' : calcSell.toLocaleString() : ''}
                     </p>
                 </div>
