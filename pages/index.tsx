@@ -28,10 +28,17 @@ const emptyTradeItem = (): TradeItem => ({
     count: 0,
 });
 
+// در همون فایل بذار بالا یا جدا:
+const BUY_LIST_KEY = 'buyList';
+const SELL_LIST_KEY = 'sellList';
 export default function IndexPage() {
     // لیست خرید و فروش
-    const [buyList, setBuyList] = useState<TradeItem[]>([emptyTradeItem()]);
-    const [sellList, setSellList] = useState<TradeItem[]>([emptyTradeItem()]);
+    const [buyList, setBuyList] = useState<TradeItem[]>(() => {
+        return loadListFromStorage(BUY_LIST_KEY) || [emptyTradeItem()];
+    });
+    const [sellList, setSellList] = useState<TradeItem[]>(() => {
+        return loadListFromStorage(SELL_LIST_KEY) || [emptyTradeItem()];
+    });
 
     // توابع بخش خرید
     const handleBuyInputChange = (idx: number, field: keyof TradeItem, value: any) => {
@@ -163,6 +170,26 @@ export default function IndexPage() {
     // سود کل
     const totalProfit = calcBuy + calcSell;
 
+    function loadListFromStorage(key: string) {
+        try {
+            const str = localStorage.getItem(key);
+            return str ? JSON.parse(str) : undefined;
+        } catch (e) {
+            return undefined;
+        }
+    }
+
+    function saveListToStorage(key: string, list: TradeItem[]) {
+        localStorage.setItem(key, JSON.stringify(list));
+    }
+
+    useEffect(() => {
+        saveListToStorage(BUY_LIST_KEY, buyList);
+    }, [buyList]);
+
+    useEffect(() => {
+        saveListToStorage(SELL_LIST_KEY, sellList);
+    }, [sellList]);
     // رندر هر ردیف خرید/فروش
     const renderTradeRow = (
         list: TradeItem[],
@@ -200,15 +227,15 @@ export default function IndexPage() {
                         label={"تعداد"}
                         value={item.count ? String(item.count) : ''}
                     />
-                    <span className={`text-xs ${type === 'buy' ? 'text-success' : 'text-danger'}`}>
-        قیمت لحظه‌ای: {mounted ? (item.nowPrice?.pDrCotVal || 0).toLocaleString() : ''}
+                    <span className={`text-lg ${type === 'buy' ? 'text-success' : 'text-danger'}`}>
+        {mounted ? (item.nowPrice?.pDrCotVal || 0).toLocaleString() : ''}
       </span>
                     {(list.length > 1) && (
                         <button onClick={() => removeRow(idx)} className="text-xs text-red-700 px-2 py-1">حذف</button>
                     )}
                 </div>
                 <div className={`md:text-2xl block mt-1 ${+rowProfit > 0 ? 'text-success' : 'text-danger'}`}>
-                    سود این ردیف: {mounted ? (isNaN(rowProfit) ? 'نامعتبر' : rowProfit.toLocaleString()) : ''}
+                    {mounted ? (isNaN(rowProfit) ? 'نامعتبر' : rowProfit.toLocaleString()) : ''}
                 </div>
             </div>
         )
@@ -219,29 +246,36 @@ export default function IndexPage() {
     }, []);
     return (
         <div>
-            <p className={`md:text-5xl text-2xl text-center mt-3 ${+totalProfit > 0 ? 'text-success' : 'text-danger'}`}>{totalProfit?.toLocaleString()}</p>
-            <div className={"w-full flex md:flex-row flex-col"}>
-                <div className={'border-4 border-success p-4 w-full'}>
-                    <p className={"md:text-5xl text-xl text-center"}>خرید</p>
-                    {renderTradeRow(buyList, handleBuyInputChange, removeBuyRow, 'buy')}
-                    <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuyRow}>اضافه ردیف
-                    </button>
-                    <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcBuy > 0 ? 'text-success' : 'text-danger'}`}>
+            {mounted ? (
+                <>
+                    <p className={`md:text-5xl text-2xl text-center mt-3 ${mounted && +totalProfit > 0 ? 'text-success' : 'text-danger'}`}>
                         {mounted
-                            ? (isNaN(calcBuy) ? 'نامعتبر' : calcBuy.toLocaleString())
+                            ? (isNaN(totalProfit) ? 'نامعتبر' : totalProfit.toLocaleString())
                             : ''}
                     </p>
-                </div>
-                <div className={'border-4 border-danger p-4 w-full'}>
-                    <p className={"md:text-5xl text-xl text-center"}>فروش</p>
-                    {renderTradeRow(sellList, handleSellInputChange, removeSellRow, 'sell')}
-                    <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSellRow}>اضافه ردیف
-                    </button>
-                    <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcSell > 0 ? 'text-success' : 'text-danger'}`}>
-                        {mounted ? isNaN(calcSell) ? 'نامعتبر' : calcSell.toLocaleString() : ''}
-                    </p>
-                </div>
-            </div>
+                    <div className={"w-full flex md:flex-row flex-col"}>
+                        <div className={'border-4 border-success p-4 w-full'}>
+                            <p className={"md:text-5xl text-xl text-center"}>خرید</p>
+                            {renderTradeRow(buyList, handleBuyInputChange, removeBuyRow, 'buy')}
+                            <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuyRow}>اضافه ردیف
+                            </button>
+                            <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcBuy > 0 ? 'text-success' : 'text-danger'}`}>
+                                {mounted
+                                    ? (isNaN(calcBuy) ? 'نامعتبر' : calcBuy.toLocaleString())
+                                    : ''}
+                            </p>
+                        </div>
+                        <div className={'border-4 border-danger p-4 w-full'}>
+                            <p className={"md:text-5xl text-xl text-center"}>فروش</p>
+                            {renderTradeRow(sellList, handleSellInputChange, removeSellRow, 'sell')}
+                            <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSellRow}>اضافه ردیف
+                            </button>
+                            <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcSell > 0 ? 'text-success' : 'text-danger'}`}>
+                                {mounted ? isNaN(calcSell) ? 'نامعتبر' : calcSell.toLocaleString() : ''}
+                            </p>
+                        </div>
+                    </div>
+                </>) : (null)}
         </div>
     );
 }
