@@ -98,8 +98,16 @@ export default function IndexPage() {
         buyList.forEach((item, idx) => {
             if (item.selected) {
                 const update = async () => {
-                    const price = await fetchDetailsSymboles(item.selected as number);
-                    handleBuyInputChange(idx, 'nowPrice', price);
+                    try {
+                        const price = await fetchDetailsSymboles(item.selected as number);
+                        // فقط اگر دیتا معتبر بود مقدار جدید را ست کن:
+                        if (price && Object.keys(price).length > 0) {
+                            handleBuyInputChange(idx, 'nowPrice', price);
+                        }
+                        // اگر دیتا نامعتبر بود (مثلاً سرور نداد)، هیچ کاری نکن!
+                    } catch (e) {
+                        // هیچ کاری نکن تا مقدار قبلی باقی بمونه
+                    }
                 };
                 update(); // موقع انتخاب سریع بقیشو بیار
                 const t = setInterval(update, 2000);
