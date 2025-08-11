@@ -101,27 +101,35 @@ export default function IndexPage() {
 
     // useEffect لیوآپدیت قیمت‌ها (خرید)
     useEffect(() => {
+        let abort = false;
         let timers: NodeJS.Timeout[] = [];
+
         buyList.forEach((item, idx) => {
             if (item.selected) {
-                const update = async () => {
+                const poll = async () => {
+                    if (abort) return;
                     try {
                         const price = await fetchDetailsSymboles(item.selected as number);
-                        // فقط اگر دیتا معتبر بود مقدار جدید را ست کن:
                         if (price && Object.keys(price).length > 0) {
                             handleBuyInputChange(idx, 'nowPrice', price);
                         }
-                        // اگر دیتا نامعتبر بود (مثلاً سرور نداد)، هیچ کاری نکن!
                     } catch (e) {
-                        // هیچ کاری نکن تا مقدار قبلی باقی بمونه
+                        // خطا رو نادیده می‌گیریم
+                    }
+                    if (!abort) {
+                        // فقط بعد از اتمام درخواست،‌ تایمر برای درخواست بعدی ست می‌کنیم
+                        const t = setTimeout(poll, 2000);
+                        timers.push(t);
                     }
                 };
-                update(); // موقع انتخاب سریع بقیشو بیار
-                const t = setInterval(update, 2000);
-                timers.push(t);
+                poll(); // اولین اجرا
             }
         });
-        return () => timers.forEach(clearInterval);
+
+        return () => {
+            abort = true;
+            timers.forEach(clearTimeout);
+        };
         // eslint-disable-next-line
     }, [buyList.map(i => i.selected).join(',')]);
 
