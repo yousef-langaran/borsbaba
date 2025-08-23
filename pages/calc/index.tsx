@@ -27,8 +27,8 @@ const emptyTradeItem = (): TradeItem => ({
     count: 0,
 });
 
-const BUY_LIST_KEY = 'buyList';
-const SELL_LIST_KEY = 'sellList';
+const BUY_LIST_KEY = 'buyListCalc';
+const SELL_LIST_KEY = 'sellListCalc';
 
 export default function IndexPage() {
     const [buyList, setBuyList] = useState<TradeItem[]>(() => {
