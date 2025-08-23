@@ -110,17 +110,13 @@ export default function IndexPage() {
         return (
             <div key={idx}>
                 <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
-                    <Autocomplete
+                    <Input
                         label={"نماد"}
-                        onInputChange={val => handleInputChange(idx, 'symbolInput', val)}
                         isLoading={item.loading}
-                        onSelectionChange={val => handleInputChange(idx, 'selected', val)}
-                        selectedKey={item.selected?.toString()}
+                        onValueChange={val => handleInputChange(idx, 'selected', val)}
+                        value={item.selected?.toString()}
                     >
-                        {item.options.map(opt => (
-                            <AutocompleteItem key={opt.insCode}>{opt.lVal18AFC}</AutocompleteItem>
-                        ))}
-                    </Autocomplete>
+                    </Input>
 
                     <Input
                         onValueChange={val => handleInputChange(idx, 'price', Number(val))}
