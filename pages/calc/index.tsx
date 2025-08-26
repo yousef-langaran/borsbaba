@@ -117,7 +117,6 @@ export default function IndexPage() {
                         value={item.selected?.toString()}
                     >
                     </Input>
-
                     <Input
                         onValueChange={val => handleInputChange(idx, 'price', Number(val))}
                         type="number"

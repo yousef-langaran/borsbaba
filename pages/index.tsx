@@ -16,6 +16,7 @@ type TradeItem = {
     nowPrice: any; // می‌تونی تایپ دقیق بزنی
     price: number;
     count: number;
+    description: string;
 };
 
 const emptyTradeItem = (): TradeItem => ({
@@ -26,6 +27,7 @@ const emptyTradeItem = (): TradeItem => ({
     nowPrice: {},
     price: 0,
     count: 0,
+    description: ''
 });
 
 // در همون فایل بذار بالا یا جدا:
@@ -231,6 +233,11 @@ export default function IndexPage() {
                             <AutocompleteItem key={opt.insCode}>{opt.lVal18AFC}</AutocompleteItem>
                         ))}
                     </Autocomplete>
+                    <Input
+                        onValueChange={val => handleInputChange(idx, 'description', val)}
+                        label={"توضیحات"}
+                        value={item.description ? String(item.description) : ''}
+                    />
                     <Input
                         onValueChange={val => handleInputChange(idx, 'price', Number(val))}
                         type={"number"}
