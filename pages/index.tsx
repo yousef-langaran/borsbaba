@@ -234,8 +234,8 @@ export default function IndexPage() {
                         ))}
                     </Autocomplete>
                     <Input
+                        classNames={{inputWrapper: 'h-14'}}
                         onValueChange={val => handleInputChange(idx, 'description', val)}
-                        label={"توضیحات"}
                         value={item.description ? String(item.description) : ''}
                     />
                     <Input
