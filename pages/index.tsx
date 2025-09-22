@@ -112,7 +112,7 @@ export default function IndexPage() {
                     if (abort) return;
                     try {
                         const price = await fetchDetailsSymboles(item.selected as number);
-                        if (price && Object.keys(price).length > 0) {
+                        if (price && Object.keys(price).length > 0 && price.pDrCotVal != null) {
                             handleBuyInputChange(idx, 'nowPrice', price);
                         }
                     } catch (e) {
@@ -158,7 +158,9 @@ export default function IndexPage() {
             if (item.selected) {
                 const update = async () => {
                     const price = await fetchDetailsSymboles(item.selected as number);
-                    handleSellInputChange(idx, 'nowPrice', price);
+                    if (price && Object.keys(price).length > 0 && price.pDrCotVal != null) {
+                        handleSellInputChange(idx, 'nowPrice', price);
+                    }
                 };
                 update();
                 const t = setInterval(update, 2000);
