@@ -269,6 +269,21 @@ export default function IndexPage() {
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    const totalBuyValue = useMemo(() =>
+        buyList.reduce((acc, item) => {
+            const currentPrice = item.nowPrice?.pDrCotVal ?? 0;
+            return acc + (currentPrice * item.count * 1000);
+        }, 0), [buyList]);
+
+// مجموع ارزش فعلی فروش
+    const totalSellValue = useMemo(() =>
+        sellList.reduce((acc, item) => {
+            const currentPrice = item.nowPrice?.pDrCotVal ?? 0;
+            return acc + (currentPrice * item.count * 1000);
+        }, 0), [sellList]);
+
+
     return (
         <div>
             {mounted ? (
@@ -281,6 +296,9 @@ export default function IndexPage() {
                     <div className={"w-full flex md:flex-row flex-col"}>
                         <div className={'border-4 border-success p-4 w-full'}>
                             <p className={"md:text-5xl text-xl text-center"}>خرید</p>
+                            <p className="text-sm text-gray-500 text-center">
+                                {mounted ? totalBuyValue.toLocaleString() : ''}
+                            </p>
                             {renderTradeRow(buyList, handleBuyInputChange, removeBuyRow, 'buy')}
                             <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuyRow}>اضافه ردیف
                             </button>
@@ -292,6 +310,9 @@ export default function IndexPage() {
                         </div>
                         <div className={'border-4 border-danger p-4 w-full'}>
                             <p className={"md:text-5xl text-xl text-center"}>فروش</p>
+                            <p className="text-sm text-gray-500 text-center">
+                                {mounted ? totalSellValue.toLocaleString() : ''}
+                            </p>
                             {renderTradeRow(sellList, handleSellInputChange, removeSellRow, 'sell')}
                             <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSellRow}>اضافه ردیف
                             </button>
