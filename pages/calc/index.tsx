@@ -197,6 +197,7 @@ export default function IndexPage() {
                         type="number"
                         label="قیمت فعلی"
                         value={item.currentPrice ? String(item.currentPrice) : ''}
+                        onValueChange={val => handleInputChange(idx, 'currentPrice', Number(val))}
                     />
                     <Input
                         onValueChange={val => handleInputChange(idx, 'count', Number(val))}
