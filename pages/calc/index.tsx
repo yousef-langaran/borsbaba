@@ -178,18 +178,18 @@ export default function IndexPage() {
                         <label className="flex items-center gap-2">
                             <input
                                 type="checkbox"
-                                checked={item.side === 'ط'}
-                                onChange={() => handleInputChange(idx, 'side', 'ط')}
-                            />
-                            ط
-                        </label>
-                        <label className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
                                 checked={item.side === 'ض'}
                                 onChange={() => handleInputChange(idx, 'side', 'ض')}
                             />
                             ض
+                        </label>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={item.side === 'ط'}
+                                onChange={() => handleInputChange(idx, 'side', 'ط')}
+                            />
+                            ط
                         </label>
                     </div>
 
@@ -221,13 +221,17 @@ export default function IndexPage() {
         <div>
             {mounted && (
                 <>
-                    <div className="bg-yellow-100 p-3 mb-4">
+                    <div className="p-3 mb-4 flex justify-center">
+                        <div className={'w-96'}>
                         <Input
                             type="number"
-                            label="قیمت اهرم"
+                            label="قیمت"
                             value={leveragePrice ? String(leveragePrice) : ''}
                             onValueChange={val => setLeveragePrice(Number(val))}
+                            classNames={{input:'text-center text-3xl font-bold'}}
+                            size={'lg'}
                         />
+                        </div>
                     </div>
 
                     <p className={`md:text-5xl text-2xl text-center mt-3 ${+totalProfit > 0 ? 'text-success' : 'text-danger'}`}>
