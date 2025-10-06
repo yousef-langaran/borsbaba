@@ -197,7 +197,6 @@ export default function IndexPage() {
                         type="number"
                         label="قیمت فعلی"
                         value={item.currentPrice ? String(item.currentPrice) : ''}
-                        isReadOnly
                     />
                     <Input
                         onValueChange={val => handleInputChange(idx, 'count', Number(val))}
