@@ -1,6 +1,8 @@
 import {useEffect, useState, useMemo} from 'react';
-import {Autocomplete, AutocompleteItem} from '@nextui-org/react';
 import {Input} from '@nextui-org/input';
+import {Switch} from '@nextui-org/react';
+
+type SideType = 'ط' | 'ض';
 
 type SymbolItem = {
     insCode: number;
@@ -13,8 +15,10 @@ type TradeItem = {
     options: SymbolItem[];
     selected: number | null;
     price: number;         // قیمت خرید یا فروش
-    currentPrice: number;  // قیمت فعلی که کاربر وارد می‌کند
+    currentPrice: number;  // قیمت فعلی
     count: number;
+    strikePrice: number;   // قیمت اعمال
+    side: SideType;        // ط یا ض
 };
 
 const emptyTradeItem = (): TradeItem => ({
@@ -25,6 +29,8 @@ const emptyTradeItem = (): TradeItem => ({
     price: 0,
     currentPrice: 0,
     count: 0,
+    strikePrice: 0,
+    side: 'ط'
 });
 
 const BUY_LIST_KEY = 'buyListCalc';
@@ -38,42 +44,9 @@ export default function IndexPage() {
         return loadListFromStorage(SELL_LIST_KEY) || [emptyTradeItem()];
     });
 
-    // تغییرات خرید
-    const handleBuyInputChange = (idx: number, field: keyof TradeItem, value: any) => {
-        setBuyList(list =>
-            list.map((item, i) => (i === idx ? {...item, [field]: value} : item))
-        );
-    };
-    const addBuyRow = () => setBuyList(list => [...list, emptyTradeItem()]);
-    const removeBuyRow = (idx: number) =>
-        setBuyList(list => list.length > 1 ? list.filter((_, i) => i !== idx) : list);
+    const [leveragePrice, setLeveragePrice] = useState<number>(0);
 
-    // تغییرات فروش
-    const handleSellInputChange = (idx: number, field: keyof TradeItem, value: any) => {
-        setSellList(list =>
-            list.map((item, i) => (i === idx ? {...item, [field]: value} : item))
-        );
-    };
-    const addSellRow = () => setSellList(list => [...list, emptyTradeItem()]);
-    const removeSellRow = (idx: number) =>
-        setSellList(list => list.length > 1 ? list.filter((_, i) => i !== idx) : list);
-
-    // محاسبه سود خرید
-    const calcBuy = useMemo(() =>
-        buyList.reduce((acc, item) => {
-            const profit = (item.currentPrice - item.price) * item.count * 1000;
-            return acc + (isNaN(profit) ? 0 : profit);
-        }, 0), [buyList]);
-
-    // محاسبه سود فروش
-    const calcSell = useMemo(() =>
-        sellList.reduce((acc, item) => {
-            const profit = (item.price - item.currentPrice) * item.count * 1000;
-            return acc + (isNaN(profit) ? 0 : profit);
-        }, 0), [sellList]);
-
-    const totalProfit = calcBuy + calcSell;
-
+    // ذخیره و Load
     function loadListFromStorage(key: string) {
         try {
             const str = localStorage.getItem(key);
@@ -82,7 +55,6 @@ export default function IndexPage() {
             return undefined;
         }
     }
-
     function saveListToStorage(key: string, list: TradeItem[]) {
         localStorage.setItem(key, JSON.stringify(list));
     }
@@ -90,10 +62,85 @@ export default function IndexPage() {
     useEffect(() => {
         saveListToStorage(BUY_LIST_KEY, buyList);
     }, [buyList]);
-
     useEffect(() => {
         saveListToStorage(SELL_LIST_KEY, sellList);
     }, [sellList]);
+
+    // بخش Buy
+    const handleBuyInputChange = (idx: number, field: keyof TradeItem, value: any) => {
+        setBuyList(list => updateListField(list, idx, field, value));
+    };
+    const addBuyRow = () => setBuyList(list => [...list, emptyTradeItem()]);
+    const removeBuyRow = (idx: number) =>
+        setBuyList(list => list.length > 1 ? list.filter((_, i) => i !== idx) : list);
+
+    // بخش Sell
+    const handleSellInputChange = (idx: number, field: keyof TradeItem, value: any) => {
+        setSellList(list => updateListField(list, idx, field, value));
+    };
+    const addSellRow = () => setSellList(list => [...list, emptyTradeItem()]);
+    const removeSellRow = (idx: number) =>
+        setSellList(list => list.length > 1 ? list.filter((_, i) => i !== idx) : list);
+
+    // فرمول محاسبه currentPrice
+    function calculateCurrentPrice(item: TradeItem, leveragePrice: number) {
+        let result = 0;
+        if (item.side === 'ض') {
+            result = leveragePrice - item.strikePrice;
+        } else {
+            result = item.strikePrice - leveragePrice;
+        }
+        return result < 1 ? 1 : result;
+    }
+
+    // تابع آپدیت یک لیست با محاسبه currentPrice
+    function updateListField(list: TradeItem[], idx: number, field: keyof TradeItem, value: any) {
+        return list.map((item, i) => {
+            if (i !== idx) return item;
+            const updatedItem = {...item, [field]: value};
+
+            // اگر فیلد نماد تغییر کرد ⇒ تعیین ط یا ض
+            if (field === 'symbolInput' && typeof value === 'string') {
+                if (value.trim().startsWith('ض')) updatedItem.side = 'ض';
+                else if (value.trim().startsWith('ط')) updatedItem.side = 'ط';
+            }
+
+            // اگر strikePrice یا side یا leveragePrice عوض شد ⇒ currentPrice رو حساب کن
+            if (field === 'strikePrice' || field === 'side' || field === 'symbolInput') {
+                updatedItem.currentPrice = calculateCurrentPrice(updatedItem, leveragePrice);
+            }
+
+            return updatedItem;
+        });
+    }
+
+    // وقتی قیمت اهرم تغییر کند ⇒ همه currentPrice ها بروزرسانی شوند
+    useEffect(() => {
+        setBuyList(list => list.map(item => ({
+            ...item,
+            currentPrice: calculateCurrentPrice(item, leveragePrice)
+        })));
+        setSellList(list => list.map(item => ({
+            ...item,
+            currentPrice: calculateCurrentPrice(item, leveragePrice)
+        })));
+    }, [leveragePrice]);
+
+    // محاسبات سود
+    const calcBuy = useMemo(() =>
+        buyList.reduce((acc, item) => {
+            const profit = (item.currentPrice - item.price) * item.count * 1000;
+            return acc + (isNaN(profit) ? 0 : profit);
+        }, 0), [buyList]);
+    const calcSell = useMemo(() =>
+        sellList.reduce((acc, item) => {
+            const profit = (item.price - item.currentPrice) * item.count * 1000;
+            return acc + (isNaN(profit) ? 0 : profit);
+        }, 0), [sellList]);
+    const totalProfit = calcBuy + calcSell;
+
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
 
     // رندر ردیف خرید/فروش
     const renderTradeRow = (
@@ -112,11 +159,9 @@ export default function IndexPage() {
                 <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
                     <Input
                         label={"نماد"}
-                        isLoading={item.loading}
-                        onValueChange={val => handleInputChange(idx, 'selected', val)}
-                        value={item.selected?.toString()}
-                    >
-                    </Input>
+                        value={item.symbolInput}
+                        onValueChange={val => handleInputChange(idx, 'symbolInput', val)}
+                    />
                     <Input
                         onValueChange={val => handleInputChange(idx, 'price', Number(val))}
                         type="number"
@@ -124,10 +169,35 @@ export default function IndexPage() {
                         value={item.price ? String(item.price) : ''}
                     />
                     <Input
-                        onValueChange={val => handleInputChange(idx, 'currentPrice', Number(val))}
+                        onValueChange={val => handleInputChange(idx, 'strikePrice', Number(val))}
+                        type="number"
+                        label="قیمت اعمال"
+                        value={item.strikePrice ? String(item.strikePrice) : ''}
+                    />
+                    <div className="flex flex-col">
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={item.side === 'ط'}
+                                onChange={() => handleInputChange(idx, 'side', 'ط')}
+                            />
+                            ط
+                        </label>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={item.side === 'ض'}
+                                onChange={() => handleInputChange(idx, 'side', 'ض')}
+                            />
+                            ض
+                        </label>
+                    </div>
+
+                    <Input
                         type="number"
                         label="قیمت فعلی"
                         value={item.currentPrice ? String(item.currentPrice) : ''}
+                        isReadOnly
                     />
                     <Input
                         onValueChange={val => handleInputChange(idx, 'count', Number(val))}
@@ -147,13 +217,19 @@ export default function IndexPage() {
         )
     });
 
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => { setMounted(true); }, []);
-
     return (
         <div>
             {mounted && (
                 <>
+                    <div className="bg-yellow-100 p-3 mb-4">
+                        <Input
+                            type="number"
+                            label="قیمت اهرم"
+                            value={leveragePrice ? String(leveragePrice) : ''}
+                            onValueChange={val => setLeveragePrice(Number(val))}
+                        />
+                    </div>
+
                     <p className={`md:text-5xl text-2xl text-center mt-3 ${+totalProfit > 0 ? 'text-success' : 'text-danger'}`}>
                         {isNaN(totalProfit) ? 'نامعتبر' : totalProfit.toLocaleString()}
                     </p>
