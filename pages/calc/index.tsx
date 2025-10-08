@@ -2,7 +2,7 @@ import {useEffect, useState, useMemo} from 'react';
 import {Input} from '@nextui-org/input';
 import {Switch} from '@nextui-org/react';
 
-type SideType = 'ط' | 'ض';
+type SideType = 'ط' | 'ض' | 'خودش'; // 1️⃣ اضافه کردن خودش
 
 type SymbolItem = {
     insCode: number;
