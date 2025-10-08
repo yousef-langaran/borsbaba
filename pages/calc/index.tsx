@@ -30,7 +30,7 @@ const emptyTradeItem = (): TradeItem => ({
     currentPrice: 0,
     count: 0,
     strikePrice: 0,
-    side: 'ط'
+    side: 'خودش'   // 2️⃣ پیشفرض خودش
 });
 
 const BUY_LIST_KEY = 'buyListCalc';
@@ -87,8 +87,10 @@ export default function IndexPage() {
         let result = 0;
         if (item.side === 'ض') {
             result = leveragePrice - item.strikePrice;
-        } else {
+        } else if (item.side === 'ط') {
             result = item.strikePrice - leveragePrice;
+        } else if (item.side === 'خودش') {
+            result = leveragePrice; // 3️⃣ مستقیم قیمت بالایی
         }
         return result < 1 ? 1 : result;
     }
@@ -190,6 +192,14 @@ export default function IndexPage() {
                                 onChange={() => handleInputChange(idx, 'side', 'ط')}
                             />
                             ط
+                        </label>
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={item.side === 'خودش'}
+                                onChange={() => handleInputChange(idx, 'side', 'خودش')}
+                            />
+                            خودش
                         </label>
                     </div>
 
