@@ -2,27 +2,13 @@ import {useEffect, useState, useMemo} from 'react';
 import axios from 'axios';
 import {Autocomplete, AutocompleteItem} from '@nextui-org/react';
 import {Input} from '@nextui-org/input';
-import {
-    DndContext,
-    closestCenter,
-    PointerSensor,
-    useSensor,
-    useSensors
-} from "@dnd-kit/core";
-import {
-    SortableContext,
-    arrayMove,
-    useSortable,
-    verticalListSortingStrategy
-} from "@dnd-kit/sortable";
-import {CSS} from "@dnd-kit/utilities";
-import {SortableTradeList} from "@/components/baba/SortableTradeList";
+
 type SymbolItem = {
     insCode: number;
     lVal18AFC: string;
 };
 
-export type TradeItem = {
+type TradeItem = {
     symbolInput: string;
     loading: boolean;
     options: SymbolItem[];
@@ -224,8 +210,61 @@ export default function IndexPage() {
     useEffect(() => {
         saveListToStorage(SELL_LIST_KEY, sellList);
     }, [sellList]);
-
-
+    // رندر هر ردیف خرید/فروش
+    const renderTradeRow = (
+        list: TradeItem[],
+        handleInputChange: (idx: number, field: keyof TradeItem, value: any) => void,
+        removeRow: (idx: number) => void,
+        type: 'buy' | 'sell'
+    ) => list.map((item, idx) => {
+        const rowProfit =
+            type === 'buy'
+                ? ((item.nowPrice?.pDrCotVal ?? 0) - item.price) * item.count * 1000
+                : (item.price - (item.nowPrice?.pDrCotVal ?? 0)) * item.count * 1000;
+        return (
+            <div key={idx}>
+                <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
+                    <Autocomplete
+                        label={"نماد"}
+                        onInputChange={val => handleInputChange(idx, 'symbolInput', val)}
+                        isLoading={item.loading}
+                        onSelectionChange={val => handleInputChange(idx, 'selected', val)}
+                        selectedKey={item.selected?.toString()}
+                    >
+                        {item.options.map(opt => (
+                            <AutocompleteItem key={opt.insCode}>{opt.lVal18AFC}</AutocompleteItem>
+                        ))}
+                    </Autocomplete>
+                    <Input
+                        classNames={{inputWrapper: 'h-14'}}
+                        onValueChange={val => handleInputChange(idx, 'description', val)}
+                        value={item.description ? String(item.description) : ''}
+                    />
+                    <Input
+                        onValueChange={val => handleInputChange(idx, 'price', Number(val))}
+                        type={"number"}
+                        label={"قیمت"}
+                        value={item.price ? String(item.price) : ''}
+                    />
+                    <Input
+                        onValueChange={val => handleInputChange(idx, 'count', Number(val))}
+                        type={"number"}
+                        label={"تعداد"}
+                        value={item.count ? String(item.count) : ''}
+                    />
+                    <span className={`text-lg ${type === 'buy' ? 'text-success' : 'text-danger'}`}>
+        {mounted ? (item.nowPrice?.pDrCotVal || 0).toLocaleString() : ''}
+      </span>
+                    {(list.length > 1) && (
+                        <button onClick={() => removeRow(idx)} className="text-xs text-red-700 px-2 py-1">حذف</button>
+                    )}
+                </div>
+                <div className={`md:text-2xl block mt-1 ${+rowProfit > 0 ? 'text-success' : 'text-danger'}`}>
+                    {mounted ? (isNaN(rowProfit) ? 'نامعتبر' : rowProfit.toLocaleString()) : ''}
+                </div>
+            </div>
+        )
+    });
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
         setMounted(true);
@@ -260,14 +299,8 @@ export default function IndexPage() {
                             <p className="text-sm text-gray-500 text-center">
                                 {mounted ? totalBuyValue.toLocaleString() : ''}
                             </p>
-                            <SortableTradeList
-                                list={buyList}
-                                setList={setBuyList}
-                                handleInputChange={handleBuyInputChange}
-                                removeRow={removeBuyRow}
-                                type="buy"
-                                mounted={mounted}
-                            />                            <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuyRow}>اضافه ردیف
+                            {renderTradeRow(buyList, handleBuyInputChange, removeBuyRow, 'buy')}
+                            <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuyRow}>اضافه ردیف
                             </button>
                             <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcBuy > 0 ? 'text-success' : 'text-danger'}`}>
                                 {mounted
@@ -280,14 +313,8 @@ export default function IndexPage() {
                             <p className="text-sm text-gray-500 text-center">
                                 {mounted ? totalSellValue.toLocaleString() : ''}
                             </p>
-                            <SortableTradeList
-                                list={sellList}
-                                setList={setSellList}
-                                handleInputChange={handleSellInputChange}
-                                removeRow={removeSellRow}
-                                type="sell"
-                                mounted={mounted}
-                            />                            <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSellRow}>اضافه ردیف
+                            {renderTradeRow(sellList, handleSellInputChange, removeSellRow, 'sell')}
+                            <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSellRow}>اضافه ردیف
                             </button>
                             <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcSell > 0 ? 'text-success' : 'text-danger'}`}>
                                 {mounted ? isNaN(calcSell) ? 'نامعتبر' : calcSell.toLocaleString() : ''}
