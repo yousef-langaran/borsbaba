@@ -14,6 +14,7 @@ import {
     verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
+import {Icon} from '@iconify/react';
 
 type SideType = 'ط' | 'ض' | 'خودش';
 
@@ -45,6 +46,7 @@ const emptyTradeItem = (): TradeItem => ({
 const BUY_LIST_KEY = 'buyListCalc';
 const SELL_LIST_KEY = 'sellListCalc';
 
+// 🏷️ ردیف درگ‌پذیر فقط با آیکون
 function SortableTradeRow({
                               id,
                               item,
@@ -64,10 +66,11 @@ function SortableTradeRow({
 }) {
     const {attributes, listeners, setNodeRef, transform, transition, isDragging} =
         useSortable({id});
+
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.5 : 1
+        opacity: isDragging ? 0.6 : 1
     };
 
     const rowProfit =
@@ -76,8 +79,13 @@ function SortableTradeRow({
             : (item.price - (item.currentPrice ?? 0)) * item.count * 1000;
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2 cursor-grab">
+        <div ref={setNodeRef} style={style} {...attributes}>
+            <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
+                {/* 🔹 هندل درگ فقط روی آیکون فعال است */}
+                <div {...listeners} className="cursor-grab hover:text-blue-600 select-none" title="Drag">
+                    <Icon icon="mdi:drag-variant" width="22" height="22" />
+                </div>
+
                 <Input
                     label="نماد"
                     value={item.symbolInput}
@@ -90,9 +98,7 @@ function SortableTradeRow({
                     value={item.price ? String(item.price) : ''}
                 />
                 <Input
-                    onValueChange={val =>
-                        handleInputChange(idx, 'strikePrice', Number(val))
-                    }
+                    onValueChange={val => handleInputChange(idx, 'strikePrice', Number(val))}
                     type="number"
                     label="قیمت اعمال"
                     value={item.strikePrice ? String(item.strikePrice) : ''}
@@ -129,9 +135,7 @@ function SortableTradeRow({
                     type="number"
                     label="قیمت فعلی"
                     value={item.currentPrice ? String(item.currentPrice) : ''}
-                    onValueChange={val =>
-                        handleInputChange(idx, 'currentPrice', Number(val))
-                    }
+                    onValueChange={val => handleInputChange(idx, 'currentPrice', Number(val))}
                 />
                 <Input
                     onValueChange={val => handleInputChange(idx, 'count', Number(val))}
@@ -139,6 +143,7 @@ function SortableTradeRow({
                     label="تعداد"
                     value={item.count ? String(item.count) : ''}
                 />
+
                 {list.length > 1 && (
                     <button
                         onClick={() => removeRow(idx)}
@@ -177,11 +182,10 @@ function SortableTradeList({
 
     const handleDragEnd = (event: any) => {
         const {active, over} = event;
-        if (active.id !== over?.id) {
-            const oldIndex = list.findIndex((_, i) => i.toString() === active.id);
-            const newIndex = list.findIndex((_, i) => i.toString() === over?.id);
-            setList(items => arrayMove(items, oldIndex, newIndex));
-        }
+        if (!over || active.id === over.id) return;
+        const oldIndex = list.findIndex((_, i) => i.toString() === active.id);
+        const newIndex = list.findIndex((_, i) => i.toString() === over.id);
+        setList(arrayMove(list, oldIndex, newIndex));
     };
 
     return (
@@ -217,20 +221,22 @@ export default function IndexPage() {
             return str ? JSON.parse(str) : [emptyTradeItem()];
         } catch { return [emptyTradeItem()]; }
     });
+
     const [leveragePrice, setLeveragePrice] = useState(0);
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
     useEffect(() => localStorage.setItem(BUY_LIST_KEY, JSON.stringify(buyList)), [buyList]);
     useEffect(() => localStorage.setItem(SELL_LIST_KEY, JSON.stringify(sellList)), [sellList]);
 
-    function calcCurrentPrice(item: TradeItem, lp: number) {
-        if (item.side === 'ض') return Math.max(1, lp - item.strikePrice);
-        if (item.side === 'ط') return Math.max(1, item.strikePrice - lp);
-        return Math.max(1, lp);
-    }
+    const calcCurrentPrice = (item: TradeItem, lp: number) =>
+        Math.max(1,
+            item.side === 'ض' ? lp - item.strikePrice :
+                item.side === 'ط' ? item.strikePrice - lp :
+                    lp
+        );
 
-    function updateField(list: TradeItem[], idx: number, field: keyof TradeItem, value: any) {
-        return list.map((item, i) => {
+    const updateField = (list: TradeItem[], idx: number, field: keyof TradeItem, value: any) =>
+        list.map((item, i) => {
             if (i !== idx) return item;
             const updated = {...item, [field]: value};
             if (field === 'symbolInput' && typeof value === 'string') {
@@ -241,7 +247,6 @@ export default function IndexPage() {
                 updated.currentPrice = calcCurrentPrice(updated, leveragePrice);
             return updated;
         });
-    }
 
     const handleBuyChange = (i: number, f: keyof TradeItem, v: any) => setBuyList(l => updateField(l, i, f, v));
     const handleSellChange = (i: number, f: keyof TradeItem, v: any) => setSellList(l => updateField(l, i, f, v));
