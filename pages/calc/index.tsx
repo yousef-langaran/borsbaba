@@ -16,6 +16,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Icon } from "@iconify/react";
 
+// ---------------- نوع داده ----------------
 type SideType = "ط" | "ض" | "خودش";
 
 interface TradeItem {
@@ -41,6 +42,7 @@ const emptyTradeItem = (): TradeItem => ({
   side: "خودش",
 });
 
+// ---------------- کامپوننت ورودی عددی پایدار ----------------
 function NumericInput({
   label,
   value,
@@ -91,6 +93,7 @@ function NumericInput({
   );
 }
 
+// ---------------- کامپوننت ردیف قابل مرتب شدن ----------------
 function SortableTradeRow({
   id,
   item,
@@ -197,10 +200,30 @@ function SortableTradeRow({
   );
 }
 
+// ---------------- کامپوننت اصلی صفحه ----------------
 export default function IndexPage() {
-  const [buyList, setBuyList] = useState<TradeItem[]>([emptyTradeItem()]);
-  const [sellList, setSellList] = useState<TradeItem[]>([emptyTradeItem()]);
-  const [leveragePrice, setLeveragePrice] = useState(0);
+  // خواندن از localStorage در لحظه‌ی mount
+  const [buyList, setBuyList] = useState<TradeItem[]>(() => {
+    const stored = localStorage.getItem("buyList");
+    return stored ? JSON.parse(stored) : [emptyTradeItem()];
+  });
+
+  const [sellList, setSellList] = useState<TradeItem[]>(() => {
+    const stored = localStorage.getItem("sellList");
+    return stored ? JSON.parse(stored) : [emptyTradeItem()];
+  });
+
+  const [leveragePrice, setLeveragePrice] = useState(() => {
+    const stored = localStorage.getItem("leveragePrice");
+    return stored ? Number(stored) : 0;
+  });
+
+  // به‌روزرسانی localStorage هنگام تغییر state‌ها
+  useEffect(() => {
+    localStorage.setItem("buyList", JSON.stringify(buyList));
+    localStorage.setItem("sellList", JSON.stringify(sellList));
+    localStorage.setItem("leveragePrice", leveragePrice.toString());
+  }, [buyList, sellList, leveragePrice]);
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -286,6 +309,7 @@ export default function IndexPage() {
     setList(arrayMove(list, oldIndex, newIndex));
   };
 
+  // ---------------- رندر ----------------
   return (
     <div className="p-4">
       <div className="flex justify-center mb-6">
@@ -305,6 +329,7 @@ export default function IndexPage() {
       </p>
 
       <div className="w-full flex md:flex-row flex-col gap-6">
+        {/* بخش خرید */}
         <div className="border-4 border-success p-4 w-full">
           <p className="text-xl text-center">خرید</p>
           <DndContext
@@ -347,6 +372,7 @@ export default function IndexPage() {
           </p>
         </div>
 
+        {/* بخش فروش */}
         <div className="border-4 border-danger p-4 w-full">
           <p className="text-xl text-center">فروش</p>
           <DndContext
