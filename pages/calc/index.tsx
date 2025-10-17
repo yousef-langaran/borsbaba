@@ -1,108 +1,133 @@
-import {useState, useEffect, useMemo} from 'react';
-import {Input} from '@nextui-org/input';
+import { useState, useEffect, useMemo } from "react";
+import { Input } from "@nextui-org/input";
 import {
   DndContext,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter
-} from '@dnd-kit/core';
+  closestCenter,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   useSortable,
   arrayMove,
-  verticalListSortingStrategy
-} from '@dnd-kit/sortable';
-import {CSS} from '@dnd-kit/utilities';
-import {Icon} from '@iconify/react';
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Icon } from "@iconify/react";
 
-type SideType = 'ط' | 'ض' | 'خودش';
-type SymbolItem = { insCode: number; lVal18AFC: string };
+type SideType = "ط" | "ض" | "خودش";
 
-interface NumericField {
-  raw: string;       // عدد خام برای محاسبه
-  display: string;   // مقدار نمایش داده شده
+interface TradeItem {
+  symbolInput: string;
+  price: number;
+  strikePrice: number;
+  currentPrice: number;
+  count: number;
+  side: SideType;
 }
 
-type TradeItem = {
-  symbolInput: string;
-  loading: boolean;
-  options: SymbolItem[];
-  selected: number | null;
-  price: NumericField;
-  currentPrice: NumericField;
-  count: NumericField;
-  strikePrice: NumericField;
-  side: SideType;
+const formatNumber = (val: number | string) => {
+  if (val === "" || val == null || isNaN(Number(val))) return "";
+  return Number(val).toLocaleString("fa-IR");
 };
 
-const emptyNumericField = (): NumericField => ({ raw: '0', display: '0' });
 const emptyTradeItem = (): TradeItem => ({
-  symbolInput: '',
-  loading: false,
-  options: [],
-  selected: null,
-  price: emptyNumericField(),
-  currentPrice: emptyNumericField(),
-  count: emptyNumericField(),
-  strikePrice: emptyNumericField(),
-  side: 'خودش'
+  symbolInput: "",
+  price: 0,
+  strikePrice: 0,
+  currentPrice: 0,
+  count: 0,
+  side: "خودش",
 });
 
-const formatNumber = (num: string | number) => {
-  if (num === '' || num == null || isNaN(Number(num))) return '';
-  return Number(num).toLocaleString('fa-IR');
-};
+function NumericInput({
+  label,
+  value,
+  onChange,
+  step = 1000,
+}: {
+  label: string;
+  value: number;
+  onChange: (val: number) => void;
+  step?: number;
+}) {
+  const [display, setDisplay] = useState(formatNumber(value));
+  const [raw, setRaw] = useState(String(value));
 
-function useNumericField(initial: number | string) {
-  const [raw, setRaw] = useState(String(initial));
-  const [display, setDisplay] = useState(formatNumber(initial));
-
-  const onFocus = () => setDisplay(raw);
-  const onBlur = () => setDisplay(formatNumber(raw));
-  const onChange = (val: string) => {
-    const clean = val.replace(/[^\d]/g, '');
+  const handleChange = (val: string) => {
+    const clean = val.replace(/[^\d]/g, "");
     setRaw(clean);
     setDisplay(clean);
   };
 
-  return { raw, display, onChange, onFocus, onBlur };
+  const handleBlur = () => {
+    const num = Number(raw);
+    const fmt = formatNumber(num);
+    setDisplay(fmt);
+    onChange(num);
+  };
+
+  const handleFocus = () => {
+    setDisplay(raw);
+  };
+
+  useEffect(() => {
+    setDisplay(formatNumber(value));
+    setRaw(String(value));
+  }, [value]);
+
+  return (
+    <Input
+      label={label}
+      type="text"
+      step={step}
+      value={display}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onValueChange={handleChange}
+      classNames={{ input: "text-center" }}
+    />
+  );
 }
 
 function SortableTradeRow({
   id,
   item,
   idx,
-  handleNumericChange,
-  handleStringChange,
+  handleChange,
   removeRow,
   type,
-  list
+  list,
 }: {
   id: string;
   item: TradeItem;
   idx: number;
-  handleNumericChange: (
+  handleChange: (
     i: number,
-    field: keyof Omit<TradeItem, 'symbolInput'|'loading'|'options'|'selected'|'side'>,
-    raw: string
+    field: keyof TradeItem,
+    val: string | number
   ) => void;
-  handleStringChange: (i: number, field: keyof TradeItem, val: any) => void;
-  removeRow: (idx: number) => void;
-  type: 'buy' | 'sell';
+  removeRow: (i: number) => void;
+  type: "buy" | "sell";
   list: TradeItem[];
 }) {
-  const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({id});
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.6 : 1 };
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
 
   const rowProfit =
-    type === 'buy'
-      ? ((+item.currentPrice.raw) - (+item.price.raw)) * (+item.count.raw) * 1000
-      : ((+item.price.raw) - (+item.currentPrice.raw)) * (+item.count.raw) * 1000;
+    type === "buy"
+      ? (item.currentPrice - item.price) * item.count * 1000
+      : (item.price - item.currentPrice) * item.count * 1000;
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
-      <div className="flex flex-wrap items-center gap-3 my-2 bg-gray-50 rounded p-2">
+      <div className="flex flex-wrap items-center gap-2 my-2 bg-gray-50 rounded p-2">
         <div {...listeners} className="cursor-grab text-blue-600">
           <Icon icon="mdi:drag-variant" width="22" height="22" />
         </div>
@@ -110,231 +135,260 @@ function SortableTradeRow({
         <Input
           label="نماد"
           value={item.symbolInput}
-          onValueChange={(val) => handleStringChange(idx, 'symbolInput', val)}
+          onValueChange={(v) => handleChange(idx, "symbolInput", v)}
         />
 
-        {(['price','strikePrice','currentPrice','count'] as const).map(field => (
-          <NumericInput
-            key={field}
-            label={
-              field === 'price'
-                ? (type === 'buy' ? 'قیمت خرید' : 'قیمت فروش')
-                : field === 'strikePrice'
-                  ? 'قیمت اعمال'
-                  : field === 'currentPrice'
-                    ? 'قیمت فعلی'
-                    : 'تعداد'
-            }
-            field={item[field]}
-            onChange={(val) => handleNumericChange(idx, field, val)}
-          />
-        ))}
+        <NumericInput
+          label={type === "buy" ? "قیمت خرید" : "قیمت فروش"}
+          value={item.price}
+          onChange={(v) => handleChange(idx, "price", v)}
+        />
 
-        {/* نوع معامله */}
+        <NumericInput
+          label="قیمت اعمال"
+          value={item.strikePrice}
+          onChange={(v) => handleChange(idx, "strikePrice", v)}
+        />
+
+        <NumericInput
+          label="قیمت فعلی"
+          value={item.currentPrice}
+          onChange={(v) => handleChange(idx, "currentPrice", v)}
+        />
+
+        <NumericInput
+          label="تعداد"
+          value={item.count}
+          onChange={(v) => handleChange(idx, "count", v)}
+        />
+
         <div className="flex flex-col">
-          {(['ض','ط','خودش'] as const).map(s => (
-            <label key={s} className="flex items-center gap-2">
+          {(["ض", "ط", "خودش"] as const).map((s) => (
+            <label key={s} className="flex items-center gap-1">
               <input
                 type="radio"
                 name={`side-${idx}`}
                 checked={item.side === s}
-                onChange={() => handleStringChange(idx, 'side', s)}
-              /> {s}
+                onChange={() => handleChange(idx, "side", s)}
+              />{" "}
+              {s}
             </label>
           ))}
         </div>
 
         {list.length > 1 && (
-          <button onClick={() => removeRow(idx)} className="text-xs text-red-700 px-2 py-1">
+          <button
+            onClick={() => removeRow(idx)}
+            className="text-xs text-red-700 px-2 py-1"
+          >
             حذف
           </button>
         )}
       </div>
 
-      <div className={`md:text-2xl mt-1 ${+rowProfit > 0 ? 'text-success' : 'text-danger'}`}>
-        {isNaN(rowProfit) ? 'نامعتبر' : formatNumber(rowProfit)}
+      <div
+        className={`text-xl mt-1 ${
+          +rowProfit > 0 ? "text-success" : "text-danger"
+        }`}
+      >
+        {isNaN(rowProfit) ? "نامعتبر" : formatNumber(rowProfit)}
       </div>
     </div>
-  );
-}
-
-function NumericInput({
-  label,
-  field,
-  onChange
-}: {
-  label: string;
-  field: NumericField;
-  onChange: (raw: string) => void;
-}) {
-  const [display, setDisplay] = useState(field.display);
-  const [raw, setRaw] = useState(field.raw);
-
-  const handleChange = (val: string) => {
-    const clean = val.replace(/[^\d]/g, '');
-    setRaw(clean);
-    setDisplay(clean);
-    onChange(clean);
-  };
-  const handleBlur = () => setDisplay(formatNumber(raw));
-  const handleFocus = () => setDisplay(raw);
-
-  useEffect(() => setDisplay(field.display), [field.display]);
-
-  return (
-    <Input
-      type="text"
-      step={1000}
-      label={label}
-      value={display}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onValueChange={handleChange}
-      classNames={{input:'text-center'}}
-    />
   );
 }
 
 export default function IndexPage() {
   const [buyList, setBuyList] = useState<TradeItem[]>([emptyTradeItem()]);
   const [sellList, setSellList] = useState<TradeItem[]>([emptyTradeItem()]);
-  const leverageField = useNumericField(0);
+  const [leveragePrice, setLeveragePrice] = useState(0);
 
-  const handleNumericChange = (listType: 'buy'|'sell') => (idx: number, field: keyof Omit<TradeItem,'symbolInput'|'loading'|'options'|'selected'|'side'>, raw: string) => {
-    const setFunc = listType === 'buy' ? setBuyList : setSellList;
-    setFunc(list => {
-      const updated = [...list];
-      updated[idx] = {...updated[idx], [field]: {...updated[idx][field], raw, display: formatNumber(raw)}};
-      return updated;
-    });
-  };
+  const sensors = useSensors(useSensor(PointerSensor));
 
-  const handleStringChange = (listType: 'buy'|'sell') => (idx: number, field: keyof TradeItem, val: any) => {
-    const setFunc = listType === 'buy' ? setBuyList : setSellList;
-    setFunc(list => {
-      const updated = [...list];
-      updated[idx] = {...updated[idx], [field]: val};
-      return updated;
-    });
-  };
-
-  const calcCurrentPrice = (it: TradeItem) => {
-    const lp = +leverageField.raw;
-    const sp = +it.strikePrice.raw;
-    if (it.side === 'ض') return Math.max(1, lp - sp);
-    if (it.side === 'ط') return Math.max(1, sp - lp);
+  const calcCurrentPrice = (item: TradeItem, lp: number) => {
+    if (item.side === "ض") return Math.max(1, lp - item.strikePrice);
+    if (item.side === "ط") return Math.max(1, item.strikePrice - lp);
     return Math.max(1, lp);
   };
 
-  // بروزرسانی قیمت فعلی با leverage
   useEffect(() => {
-    setBuyList(list => list.map(it => ({...it, currentPrice: { raw: String(calcCurrentPrice(it)), display: formatNumber(calcCurrentPrice(it)) }})));
-    setSellList(list => list.map(it => ({...it, currentPrice: { raw: String(calcCurrentPrice(it)), display: formatNumber(calcCurrentPrice(it)) }})));
-  }, [leverageField.raw]);
+    setBuyList((list) =>
+      list.map((it) => ({
+        ...it,
+        currentPrice: calcCurrentPrice(it, leveragePrice),
+      }))
+    );
+    setSellList((list) =>
+      list.map((it) => ({
+        ...it,
+        currentPrice: calcCurrentPrice(it, leveragePrice),
+      }))
+    );
+  }, [leveragePrice]);
 
-  const calcBuy = useMemo(() => buyList.reduce((a, it) => a + (((+it.currentPrice.raw - +it.price.raw) * +it.count.raw * 1000) || 0), 0), [buyList]);
-  const calcSell = useMemo(() => sellList.reduce((a, it) => a + (((+it.price.raw - +it.currentPrice.raw) * +it.count.raw * 1000) || 0), 0), [sellList]);
+  const handleChangeBuy = (
+    i: number,
+    field: keyof TradeItem,
+    val: string | number
+  ) => {
+    setBuyList((list) => {
+      const newList = [...list];
+      newList[i] = { ...newList[i], [field]: val };
+      return newList;
+    });
+  };
+
+  const handleChangeSell = (
+    i: number,
+    field: keyof TradeItem,
+    val: string | number
+  ) => {
+    setSellList((list) => {
+      const newList = [...list];
+      newList[i] = { ...newList[i], [field]: val };
+      return newList;
+    });
+  };
+
+  const addRowBuy = () => setBuyList((l) => [...l, emptyTradeItem()]);
+  const addRowSell = () => setSellList((l) => [...l, emptyTradeItem()]);
+  const removeRowBuy = (i: number) =>
+    setBuyList((l) => (l.length > 1 ? l.filter((_, x) => x !== i) : l));
+  const removeRowSell = (i: number) =>
+    setSellList((l) => (l.length > 1 ? l.filter((_, x) => x !== i) : l));
+
+  const calcBuy = useMemo(
+    () =>
+      buyList.reduce(
+        (a, it) =>
+          a + (it.currentPrice - it.price) * it.count * 1000 || 0,
+        0
+      ),
+    [buyList]
+  );
+
+  const calcSell = useMemo(
+    () =>
+      sellList.reduce(
+        (a, it) =>
+          a + (it.price - it.currentPrice) * it.count * 1000 || 0,
+        0
+      ),
+    [sellList]
+  );
+
   const totalProfit = calcBuy + calcSell;
+
+  const handleDragEnd = (event: any, list: TradeItem[], setList: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = Number(active.id);
+    const newIndex = Number(over.id);
+    setList(arrayMove(list, oldIndex, newIndex));
+  };
 
   return (
     <div className="p-4">
       <div className="flex justify-center mb-6">
-        <Input
-          type="text"
-          step={1000}
+        <NumericInput
           label="قیمت"
-          value={leverageField.display}
-          onValueChange={leverageField.onChange}
-          onFocus={leverageField.onFocus}
-          onBlur={leverageField.onBlur}
-          size="lg"
-          classNames={{input:'text-center text-3xl font-bold'}}
+          value={leveragePrice}
+          onChange={(v) => setLeveragePrice(v)}
         />
       </div>
 
-      <p className={`md:text-5xl text-2xl text-center ${totalProfit>0?'text-success':'text-danger'}`}>
-        {isNaN(totalProfit)?'نامعتبر':formatNumber(totalProfit)}
+      <p
+        className={`md:text-5xl text-2xl text-center ${
+          +totalProfit > 0 ? "text-success" : "text-danger"
+        }`}
+      >
+        {isNaN(totalProfit) ? "نامعتبر" : formatNumber(totalProfit)}
       </p>
 
       <div className="w-full flex md:flex-row flex-col gap-6">
-        <TradeSection
-          type="buy"
-          list={buyList}
-          setList={setBuyList}
-          handleNumericChange={handleNumericChange('buy')}
-          handleStringChange={handleStringChange('buy')}
-          calcTotal={calcBuy}
-        />
-        <TradeSection
-          type="sell"
-          list={sellList}
-          setList={setSellList}
-          handleNumericChange={handleNumericChange('sell')}
-          handleStringChange={handleStringChange('sell')}
-          calcTotal={calcSell}
-        />
+        <div className="border-4 border-success p-4 w-full">
+          <p className="text-xl text-center">خرید</p>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(e) => handleDragEnd(e, buyList, setBuyList)}
+          >
+            <SortableContext
+              items={buyList.map((_, i) => i.toString())}
+              strategy={verticalListSortingStrategy}
+            >
+              {buyList.map((item, idx) => (
+                <SortableTradeRow
+                  key={idx}
+                  id={idx.toString()}
+                  item={item}
+                  idx={idx}
+                  handleChange={handleChangeBuy}
+                  removeRow={removeRowBuy}
+                  type="buy"
+                  list={buyList}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+
+          <button
+            className="my-2 bg-green-700 text-white px-3 py-1 rounded"
+            onClick={addRowBuy}
+          >
+            اضافه ردیف
+          </button>
+
+          <p
+            className={`text-xl text-center ${
+              +calcBuy > 0 ? "text-success" : "text-danger"
+            }`}
+          >
+            {formatNumber(calcBuy)}
+          </p>
+        </div>
+
+        <div className="border-4 border-danger p-4 w-full">
+          <p className="text-xl text-center">فروش</p>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={(e) => handleDragEnd(e, sellList, setSellList)}
+          >
+            <SortableContext
+              items={sellList.map((_, i) => i.toString())}
+              strategy={verticalListSortingStrategy}
+            >
+              {sellList.map((item, idx) => (
+                <SortableTradeRow
+                  key={idx}
+                  id={idx.toString()}
+                  item={item}
+                  idx={idx}
+                  handleChange={handleChangeSell}
+                  removeRow={removeRowSell}
+                  type="sell"
+                  list={sellList}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+
+          <button
+            className="my-2 bg-red-700 text-white px-3 py-1 rounded"
+            onClick={addRowSell}
+          >
+            اضافه ردیف
+          </button>
+
+          <p
+            className={`text-xl text-center ${
+              +calcSell > 0 ? "text-success" : "text-danger"
+            }`}
+          >
+            {formatNumber(calcSell)}
+          </p>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function TradeSection({
-  type,
-  list,
-  setList,
-  handleNumericChange,
-  handleStringChange,
-  calcTotal
-}: {
-  type:'buy'|'sell';
-  list:TradeItem[];
-  setList:React.Dispatch<React.SetStateAction<TradeItem[]>>;
-  handleNumericChange:(idx:number,field:any,raw:string)=>void;
-  handleStringChange:(idx:number,field:any,val:any)=>void;
-  calcTotal:number;
-}) {
-  const sensors = useSensors(useSensor(PointerSensor));
-  const handleDragEnd = (event:any)=>{
-    const {active,over}=event;
-    if(!over||active.id===over.id)return;
-    const oldIndex=Number(active.id);
-    const newIndex=Number(over.id);
-    setList(list=>arrayMove(list,oldIndex,newIndex));
-  };
-  const addRow = () => setList(list => [...list, emptyTradeItem()]);
-  const removeRow = (i:number) => setList(list => list.length>1?list.filter((_,x)=>x!==i):list);
-
-  return (
-    <div className={`border-4 ${type==='buy'?'border-success':'border-danger'} p-4 w-full`}>
-      <p className="md:text-5xl text-xl text-center">{type==='buy'?'خرید':'فروش'}</p>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={list.map((_,i)=>i.toString())} strategy={verticalListSortingStrategy}>
-          {list.map((item,idx)=>(
-            <SortableTradeRow
-              key={idx}
-              id={idx.toString()}
-              item={item}
-              idx={idx}
-              handleNumericChange={handleNumericChange}
-              handleStringChange={handleStringChange}
-              removeRow={removeRow}
-              type={type}
-              list={list}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
-
-      <button
-        className={`my-2 ${type==='buy'?'bg-green-600':'bg-red-700'} text-white px-3 py-1 rounded`}
-        onClick={addRow}
-      >
-        اضافه ردیف
-      </button>
-
-      <p className={`md:text-5xl text-2xl text-center mt-3 ${calcTotal>0?'text-success':'text-danger'}`}>
-        {isNaN(calcTotal)?'نامعتبر':formatNumber(calcTotal)}
-      </p>
     </div>
   );
 }
