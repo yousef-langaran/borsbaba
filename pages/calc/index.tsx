@@ -1,52 +1,110 @@
-import {useState, useEffect, useMemo} from 'react';
-import {Input} from '@nextui-org/input';
+import { useState, useEffect, useMemo } from "react";
+import { Input } from "@nextui-org/input";
 import {
     DndContext,
+    PointerSensor,
     useSensor,
     useSensors,
-    PointerSensor,
-    closestCenter
-} from '@dnd-kit/core';
+    closestCenter,
+} from "@dnd-kit/core";
 import {
     SortableContext,
     useSortable,
     arrayMove,
-    verticalListSortingStrategy
-} from '@dnd-kit/sortable';
-import {CSS} from '@dnd-kit/utilities';
-import {Icon} from '@iconify/react';
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Icon } from "@iconify/react";
 
-type SideType = 'ط' | 'ض' | 'خودش';
-
+type SideType = "ط" | "ض" | "خودش";
 type SymbolItem = { insCode: number; lVal18AFC: string };
+
 type TradeItem = {
     symbolInput: string;
     loading: boolean;
     options: SymbolItem[];
     selected: number | null;
     price: number;
+    strikePrice: number;
     currentPrice: number;
     count: number;
-    strikePrice: number;
     side: SideType;
 };
 
 const emptyTradeItem = (): TradeItem => ({
-    symbolInput: '',
+    symbolInput: "",
     loading: false,
     options: [],
     selected: null,
     price: 0,
+    strikePrice: 0,
     currentPrice: 0,
     count: 0,
-    strikePrice: 0,
-    side: 'خودش'
+    side: "خودش",
 });
 
-const BUY_LIST_KEY = 'buyListCalc';
-const SELL_LIST_KEY = 'sellListCalc';
+const BUY_LIST_KEY = "buyListCalc";
+const SELL_LIST_KEY = "sellListCalc";
 
-// 🏷️ ردیف درگ‌پذیر فقط با آیکون
+const formatNumber = (num: number | string): string => {
+    if (num === "" || num == null) return "";
+    const n = Number(String(num).replace(/,/g, ""));
+    if (isNaN(n) || n === 0) return "";
+    return n.toLocaleString("fa-IR");
+};
+
+const parseNumber = (val: string): number =>
+    Number(String(val).replace(/,/g, "").trim() || "0");
+
+// ---------------- NumberInput Component ----------------
+function NumberInput({
+                         value,
+                         onChange,
+                         label,
+                         className = "",
+                     }: {
+    value: number;
+    onChange: (val: number) => void;
+    label: string;
+    className?: string;
+}) {
+    const [localValue, setLocalValue] = useState<string>("");
+    const [isFocused, setIsFocused] = useState(false);
+
+    // وقتی value از بیرون تغییر می‌کند و focus نداریم، localValue را آپدیت کن
+    useEffect(() => {
+        if (!isFocused) {
+            setLocalValue(formatNumber(value));
+        }
+    }, [value, isFocused]);
+
+    const handleChange = (val: string) => {
+        setLocalValue(val);
+        const num = parseNumber(val);
+        onChange(num);
+    };
+
+    return (
+        <Input
+            type="text"
+            label={label}
+            value={isFocused ? localValue : formatNumber(value)}
+            onFocus={() => {
+                setIsFocused(true);
+                setLocalValue(value === 0 ? "" : String(value));
+            }}
+            onBlur={() => {
+                setIsFocused(false);
+                setLocalValue(formatNumber(value));
+            }}
+            onValueChange={handleChange}
+            classNames={{ input: `font-bold text-md ${className}` }}
+        />
+    );
+}
+
+// ---------------- SortableTradeRow ----------------
+
 function SortableTradeRow({
                               id,
                               item,
@@ -54,134 +112,120 @@ function SortableTradeRow({
                               handleInputChange,
                               removeRow,
                               type,
-                              list
+                              list,
                           }: {
     id: string;
     item: TradeItem;
     idx: number;
     handleInputChange: (idx: number, field: keyof TradeItem, value: any) => void;
     removeRow: (idx: number) => void;
-    type: 'buy' | 'sell';
+    type: "buy" | "sell";
     list: TradeItem[];
 }) {
-    const {attributes, listeners, setNodeRef, transform, transition, isDragging} =
-        useSortable({id});
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+        useSortable({ id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.6 : 1
+        opacity: isDragging ? 0.6 : 1,
     };
 
     const rowProfit =
-        type === 'buy'
-            ? ((item.currentPrice ?? 0) - item.price) * item.count * 1000
-            : (item.price - (item.currentPrice ?? 0)) * item.count * 1000;
+        type === "buy"
+            ? (item.currentPrice - item.price) * item.count * 1000
+            : (item.price - item.currentPrice) * item.count * 1000;
 
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
             <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
-                {/* 🔹 هندل درگ فقط روی آیکون فعال است */}
-                <div {...listeners} className="cursor-grab hover:text-blue-600 select-none" title="Drag">
+                <div {...listeners} className="cursor-grab select-none hover:text-blue-600">
                     <Icon icon="mdi:drag-variant" width="22" height="22" />
                 </div>
 
                 <Input
                     label="نماد"
                     value={item.symbolInput}
-                    onValueChange={val => handleInputChange(idx, 'symbolInput', val)}
+                    onValueChange={(val) => handleInputChange(idx, "symbolInput", val)}
+                    classNames={{ input: "font-bold text-md" }}
                 />
-                <Input
-                    onValueChange={val => handleInputChange(idx, 'price', Number(val))}
-                    type="number"
-                    label={type === 'buy' ? 'قیمت خرید' : 'قیمت فروش'}
-                    value={item.price ? String(item.price) : ''}
+
+                <NumberInput
+                    label={type === "buy" ? "قیمت خرید" : "قیمت فروش"}
+                    value={item.price}
+                    onChange={(val) => handleInputChange(idx, "price", val)}
                 />
-                <Input
-                    onValueChange={val => handleInputChange(idx, 'strikePrice', Number(val))}
-                    type="number"
+
+                <NumberInput
                     label="قیمت اعمال"
-                    value={item.strikePrice ? String(item.strikePrice) : ''}
+                    value={item.strikePrice}
+                    onChange={(val) => handleInputChange(idx, "strikePrice", val)}
                 />
 
-                <div className="flex flex-col">
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={item.side === 'ض'}
-                            onChange={() => handleInputChange(idx, 'side', 'ض')}
-                        />
-                        ض
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={item.side === 'ط'}
-                            onChange={() => handleInputChange(idx, 'side', 'ط')}
-                        />
-                        ط
-                    </label>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={item.side === 'خودش'}
-                            onChange={() => handleInputChange(idx, 'side', 'خودش')}
-                        />
-                        خودش
-                    </label>
-                </div>
-
-                <Input
-                    type="number"
+                <NumberInput
                     label="قیمت فعلی"
-                    value={item.currentPrice ? String(item.currentPrice) : ''}
-                    onValueChange={val => handleInputChange(idx, 'currentPrice', Number(val))}
+                    value={item.currentPrice}
+                    onChange={(val) => handleInputChange(idx, "currentPrice", val)}
                 />
-                <Input
-                    onValueChange={val => handleInputChange(idx, 'count', Number(val))}
-                    type="number"
+
+                <NumberInput
                     label="تعداد"
-                    value={item.count ? String(item.count) : ''}
+                    value={item.count}
+                    onChange={(val) => handleInputChange(idx, "count", val)}
                 />
+
+                <div className="flex flex-col text-sm">
+                    {["ض", "ط", "خودش"].map((side) => (
+                        <label key={side} className="flex items-center gap-1">
+                            <input
+                                type="radio"
+                                checked={item.side === side}
+                                onChange={() => handleInputChange(idx, "side", side as SideType)}
+                            />
+                            {side}
+                        </label>
+                    ))}
+                </div>
 
                 {list.length > 1 && (
                     <button
                         onClick={() => removeRow(idx)}
-                        className="text-xs text-red-700 px-2 py-1"
+                        className="px-2 py-1 text-xs text-red-600"
                     >
                         حذف
                     </button>
                 )}
             </div>
 
-            <div
-                className={`md:text-2xl block mt-1 ${
-                    +rowProfit > 0 ? 'text-success' : 'text-danger'
+            <p
+                className={`md:text-xl block mt-1 ${
+                    rowProfit > 0 ? "text-green-600" : "text-red-600"
                 }`}
             >
-                {isNaN(rowProfit) ? 'نامعتبر' : rowProfit.toLocaleString()}
-            </div>
+                {isNaN(rowProfit) ? "نامعتبر" : rowProfit.toLocaleString("fa-IR")}
+            </p>
         </div>
     );
 }
+
+// ---------------- SortableTradeList ----------------
 
 function SortableTradeList({
                                list,
                                setList,
                                handleInputChange,
                                removeRow,
-                               type
+                               type,
                            }: {
     list: TradeItem[];
     setList: React.Dispatch<React.SetStateAction<TradeItem[]>>;
     handleInputChange: (idx: number, field: keyof TradeItem, value: any) => void;
     removeRow: (idx: number) => void;
-    type: 'buy' | 'sell';
+    type: "buy" | "sell";
 }) {
     const sensors = useSensors(useSensor(PointerSensor));
-
     const handleDragEnd = (event: any) => {
-        const {active, over} = event;
+        const { active, over } = event;
         if (!over || active.id === over.id) return;
         const oldIndex = list.findIndex((_, i) => i.toString() === active.id);
         const newIndex = list.findIndex((_, i) => i.toString() === over.id);
@@ -208,100 +252,158 @@ function SortableTradeList({
     );
 }
 
+// ---------------- IndexPage ----------------
+
 export default function IndexPage() {
-    const [buyList, setBuyList] = useState<TradeItem[]>(() => {
-        try {
-            const str = localStorage.getItem(BUY_LIST_KEY);
-            return str ? JSON.parse(str) : [emptyTradeItem()];
-        } catch { return [emptyTradeItem()]; }
-    });
-    const [sellList, setSellList] = useState<TradeItem[]>(() => {
-        try {
-            const str = localStorage.getItem(SELL_LIST_KEY);
-            return str ? JSON.parse(str) : [emptyTradeItem()];
-        } catch { return [emptyTradeItem()]; }
-    });
-
-    const [leveragePrice, setLeveragePrice] = useState(0);
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
-    useEffect(() => localStorage.setItem(BUY_LIST_KEY, JSON.stringify(buyList)), [buyList]);
-    useEffect(() => localStorage.setItem(SELL_LIST_KEY, JSON.stringify(sellList)), [sellList]);
-
-    const calcCurrentPrice = (item: TradeItem, lp: number) =>
-        Math.max(1,
-            item.side === 'ض' ? lp - item.strikePrice :
-                item.side === 'ط' ? item.strikePrice - lp :
-                    lp
-        );
-
-    const updateField = (list: TradeItem[], idx: number, field: keyof TradeItem, value: any) =>
-        list.map((item, i) => {
-            if (i !== idx) return item;
-            const updated = {...item, [field]: value};
-            if (field === 'symbolInput' && typeof value === 'string') {
-                if (value.trim().startsWith('ض')) updated.side = 'ض';
-                else if (value.trim().startsWith('ط')) updated.side = 'ط';
-            }
-            if (['strikePrice', 'side', 'symbolInput'].includes(field))
-                updated.currentPrice = calcCurrentPrice(updated, leveragePrice);
-            return updated;
-        });
-
-    const handleBuyChange = (i: number, f: keyof TradeItem, v: any) => setBuyList(l => updateField(l, i, f, v));
-    const handleSellChange = (i: number, f: keyof TradeItem, v: any) => setSellList(l => updateField(l, i, f, v));
-    const addBuy = () => setBuyList(l => [...l, emptyTradeItem()]);
-    const addSell = () => setSellList(l => [...l, emptyTradeItem()]);
-    const removeBuy = (i: number) => setBuyList(l => l.length > 1 ? l.filter((_, x) => x !== i) : l);
-    const removeSell = (i: number) => setSellList(l => l.length > 1 ? l.filter((_, x) => x !== i) : l);
+    const [buyList, setBuyList] = useState<TradeItem[]>([emptyTradeItem()]);
+    const [sellList, setSellList] = useState<TradeItem[]>([emptyTradeItem()]);
+    const [leveragePrice, setLeveragePrice] = useState<number>(0);
 
     useEffect(() => {
-        setBuyList(l => l.map(it => ({...it, currentPrice: calcCurrentPrice(it, leveragePrice)})));
-        setSellList(l => l.map(it => ({...it, currentPrice: calcCurrentPrice(it, leveragePrice)})));
+        const savedBuy = localStorage.getItem(BUY_LIST_KEY);
+        const savedSell = localStorage.getItem(SELL_LIST_KEY);
+        if (savedBuy) setBuyList(JSON.parse(savedBuy));
+        if (savedSell) setSellList(JSON.parse(savedSell));
+    }, []);
+
+    const calcCurrentPrice = (item: TradeItem, lp: number) =>
+        Math.max(
+            1,
+            item.side === "ض"
+                ? lp - item.strikePrice
+                : item.side === "ط"
+                    ? item.strikePrice - lp
+                    : lp
+        );
+
+    const updateField = (
+        list: TradeItem[],
+        idx: number,
+        field: keyof TradeItem,
+        value: any
+    ) =>
+        list.map((it, i) =>
+            i === idx
+                ? {
+                    ...it,
+                    [field]: value,
+                    currentPrice:
+                        field === "strikePrice" || field === "side" || field === "symbolInput"
+                            ? calcCurrentPrice({ ...it, [field]: value }, leveragePrice)
+                            : it.currentPrice,
+                }
+                : it
+        );
+
+    const handleBuyChange = (i: number, f: keyof TradeItem, v: any) =>
+        setBuyList((l) => updateField(l, i, f, v));
+    const handleSellChange = (i: number, f: keyof TradeItem, v: any) =>
+        setSellList((l) => updateField(l, i, f, v));
+
+    useEffect(() => {
+        localStorage.setItem(BUY_LIST_KEY, JSON.stringify(buyList));
+    }, [buyList]);
+    useEffect(() => {
+        localStorage.setItem(SELL_LIST_KEY, JSON.stringify(sellList));
+    }, [sellList]);
+
+    useEffect(() => {
+        setBuyList((l) =>
+            l.map((it) => ({ ...it, currentPrice: calcCurrentPrice(it, leveragePrice) }))
+        );
+        setSellList((l) =>
+            l.map((it) => ({ ...it, currentPrice: calcCurrentPrice(it, leveragePrice) }))
+        );
     }, [leveragePrice]);
 
-    const calcBuy = useMemo(() => buyList.reduce((a, it) => a + ((it.currentPrice - it.price) * it.count * 1000 || 0), 0), [buyList]);
-    const calcSell = useMemo(() => sellList.reduce((a, it) => a + ((it.price - it.currentPrice) * it.count * 1000 || 0), 0), [sellList]);
-    const totalProfit = calcBuy + calcSell;
+    const calcBuyProfit = useMemo(
+        () =>
+            buyList.reduce(
+                (sum, it) => sum + (it.currentPrice - it.price) * it.count * 1000,
+                0
+            ),
+        [buyList]
+    );
+    const calcSellProfit = useMemo(
+        () =>
+            sellList.reduce(
+                (sum, it) => sum + (it.price - it.currentPrice) * it.count * 1000,
+                0
+            ),
+        [sellList]
+    );
+    const totalProfit = calcBuyProfit + calcSellProfit;
 
-    return mounted ? (
-        <div>
-            <div className="p-3 mb-4 flex justify-center">
+    return (
+        <div className="p-4">
+            <div className="flex justify-center mb-5">
                 <div className="w-96">
-                    <Input
-                        type="number"
+                    <NumberInput
                         label="قیمت"
-                        value={leveragePrice ? String(leveragePrice) : ''}
-                        onValueChange={val => setLeveragePrice(Number(val))}
-                        classNames={{input:'text-center text-3xl font-bold'}}
-                        size="lg"
+                        value={leveragePrice}
+                        onChange={setLeveragePrice}
+                        className="text-center text-3xl"
                     />
                 </div>
             </div>
 
-            <p className={`md:text-5xl text-2xl text-center mt-3 ${+totalProfit > 0 ? 'text-success' : 'text-danger'}`}>
-                {isNaN(totalProfit) ? 'نامعتبر' : totalProfit.toLocaleString()}
+            <p
+                className={`text-center md:text-5xl text-2xl ${
+                    totalProfit > 0 ? "text-green-600" : "text-red-600"
+                }`}
+            >
+                {isNaN(totalProfit) ? "نامعتبر" : totalProfit.toLocaleString("fa-IR")}
             </p>
 
-            <div className="w-full flex md:flex-row flex-col">
-                <div className="border-4 border-success p-4 w-full">
-                    <p className="md:text-5xl text-xl text-center">خرید</p>
-                    <SortableTradeList list={buyList} setList={setBuyList} handleInputChange={handleBuyChange} removeRow={removeBuy} type="buy" />
-                    <button className="my-2 bg-green-600 text-white px-3 py-1 rounded" onClick={addBuy}>اضافه ردیف</button>
-                    <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcBuy > 0 ? 'text-success' : 'text-danger'}`}>
-                        {isNaN(calcBuy) ? 'نامعتبر' : calcBuy.toLocaleString()}
+            <div className="flex md:flex-row flex-col gap-4 mt-5">
+                <div className="border-4 border-green-600 p-4 flex-1">
+                    <p className="text-center text-3xl">خرید</p>
+                    <SortableTradeList
+                        list={buyList}
+                        setList={setBuyList}
+                        handleInputChange={handleBuyChange}
+                        removeRow={(i) => setBuyList((l) => l.filter((_, x) => x !== i))}
+                        type="buy"
+                    />
+                    <button
+                        onClick={() => setBuyList((l) => [...l, emptyTradeItem()])}
+                        className="bg-green-600 text-white px-3 py-1 mt-2 rounded"
+                    >
+                        اضافه ردیف
+                    </button>
+                    <p
+                        className={`text-center md:text-4xl mt-3 ${
+                            calcBuyProfit > 0 ? "text-green-600" : "text-red-600"
+                        }`}
+                    >
+                        {formatNumber(calcBuyProfit)}
                     </p>
                 </div>
 
-                <div className="border-4 border-danger p-4 w-full">
-                    <p className="md:text-5xl text-xl text-center">فروش</p>
-                    <SortableTradeList list={sellList} setList={setSellList} handleInputChange={handleSellChange} removeRow={removeSell} type="sell" />
-                    <button className="my-2 bg-red-700 text-white px-3 py-1 rounded" onClick={addSell}>اضافه ردیف</button>
-                    <p className={`md:text-5xl text-2xl text-center mt-3 ${+calcSell > 0 ? 'text-success' : 'text-danger'}`}>
-                        {isNaN(calcSell) ? 'نامعتبر' : calcSell.toLocaleString()}
+                <div className="border-4 border-red-600 p-4 flex-1">
+                    <p className="text-center text-3xl">فروش</p>
+                    <SortableTradeList
+                        list={sellList}
+                        setList={setSellList}
+                        handleInputChange={handleSellChange}
+                        removeRow={(i) => setSellList((l) => l.filter((_, x) => x !== i))}
+                        type="sell"
+                    />
+                    <button
+                        onClick={() => setSellList((l) => [...l, emptyTradeItem()])}
+                        className="bg-red-700 text-white px-3 py-1 mt-2 rounded"
+                    >
+                        اضافه ردیف
+                    </button>
+                    <p
+                        className={`text-center md:text-4xl mt-3 ${
+                            calcSellProfit > 0 ? "text-green-600" : "text-red-600"
+                        }`}
+                    >
+                        {formatNumber(calcSellProfit)}
                     </p>
                 </div>
             </div>
         </div>
-    ) : null;
+    );
 }
