@@ -198,7 +198,7 @@ function SortableTradeRow({
                     ))}
                 </div>
 
-                <div>
+                <div className={'w-96'}>
                 <Input
                     label="نماد"
                     value={item.symbolInput}
