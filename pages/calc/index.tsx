@@ -198,12 +198,14 @@ function SortableTradeRow({
                     ))}
                 </div>
 
+                <div>
                 <Input
                     label="نماد"
                     value={item.symbolInput}
                     onValueChange={(val) => handleInputChange(idx, "symbolInput", val)}
                     classNames={{ input: "font-bold text-md" }}
                 />
+                </div>
 
                 <NumberInput
                     label={type === "buy" ? "قیمت خرید" : "قیمت فروش"}
