@@ -45,6 +45,7 @@ const emptyTradeItem = (): TradeItem => ({
 
 const BUY_LIST_KEY = "buyListCalc";
 const SELL_LIST_KEY = "sellListCalc";
+const LEVERAGE_PRICE_KEY = "leveragePriceCalc";
 
 const formatNumber = (num: number | string): string => {
     if (num === "" || num == null) return "";
@@ -56,22 +57,31 @@ const formatNumber = (num: number | string): string => {
 const parseNumber = (val: string): number =>
     Number(String(val).replace(/,/g, "").trim() || "0");
 
-// ---------------- NumberInput Component ----------------
+const detectSideFromSymbol = (symbol: string): SideType => {
+    const firstChar = symbol.trim()[0];
+    if (firstChar === "ط") return "ط";
+    if (firstChar === "ض") return "ض";
+    return "خودش";
+};
+
+// ---------------- NumberInput Component با دکمه‌های افزایش/کاهش ----------------
 function NumberInput({
                          value,
                          onChange,
                          label,
                          className = "",
+                         step = 1000,
                      }: {
     value: number;
     onChange: (val: number) => void;
     label: string;
     className?: string;
+    step?: number;
 }) {
     const [localValue, setLocalValue] = useState<string>("");
     const [isFocused, setIsFocused] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
-    // وقتی value از بیرون تغییر می‌کند و focus نداریم، localValue را آپدیت کن
     useEffect(() => {
         if (!isFocused) {
             setLocalValue(formatNumber(value));
@@ -84,22 +94,54 @@ function NumberInput({
         onChange(num);
     };
 
+    const increment = () => {
+        onChange(value + step);
+    };
+
+    const decrement = () => {
+        onChange(Math.max(0, value - step));
+    };
+
     return (
-        <Input
-            type="text"
-            label={label}
-            value={isFocused ? localValue : formatNumber(value)}
-            onFocus={() => {
-                setIsFocused(true);
-                setLocalValue(value === 0 ? "" : String(value));
-            }}
-            onBlur={() => {
-                setIsFocused(false);
-                setLocalValue(formatNumber(value));
-            }}
-            onValueChange={handleChange}
-            classNames={{ input: `font-bold text-md ${className}` }}
-        />
+        <div
+            className="relative flex items-center gap-1"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <Input
+                type="text"
+                label={label}
+                value={isFocused ? localValue : formatNumber(value)}
+                onFocus={() => {
+                    setIsFocused(true);
+                    setLocalValue(value === 0 ? "" : String(value));
+                }}
+                onBlur={() => {
+                    setIsFocused(false);
+                    setLocalValue(formatNumber(value));
+                }}
+                onValueChange={handleChange}
+                classNames={{ input: `font-bold text-md ${className}` }}
+            />
+            {isHovered && (
+                <div className="flex flex-col gap-0.5 absolute left-0 z-10">
+                    <button
+                        type="button"
+                        onClick={increment}
+                        className="bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
+                    >
+                        <Icon icon="mdi:chevron-up" width="14" height="14" />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={decrement}
+                        className="bg-blue-500 hover:bg-blue-600 text-white rounded text-xs transition-colors"
+                    >
+                        <Icon icon="mdi:chevron-down" width="14" height="14" />
+                    </button>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -138,9 +180,22 @@ function SortableTradeRow({
 
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
-            <div className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
+            <div className="flex gap-1 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2">
                 <div {...listeners} className="cursor-grab select-none hover:text-blue-600">
                     <Icon icon="mdi:drag-variant" width="22" height="22" />
+                </div>
+
+                <div className="flex flex-col text-sm">
+                    {["ض", "ط", "خودش"].map((side) => (
+                        <label key={side} className="flex items-center gap-1">
+                            <input
+                                type="radio"
+                                checked={item.side === side}
+                                onChange={() => handleInputChange(idx, "side", side as SideType)}
+                            />
+                            {side}
+                        </label>
+                    ))}
                 </div>
 
                 <Input
@@ -173,19 +228,6 @@ function SortableTradeRow({
                     value={item.count}
                     onChange={(val) => handleInputChange(idx, "count", val)}
                 />
-
-                <div className="flex flex-col text-sm">
-                    {["ض", "ط", "خودش"].map((side) => (
-                        <label key={side} className="flex items-center gap-1">
-                            <input
-                                type="radio"
-                                checked={item.side === side}
-                                onChange={() => handleInputChange(idx, "side", side as SideType)}
-                            />
-                            {side}
-                        </label>
-                    ))}
-                </div>
 
                 {list.length > 1 && (
                     <button
@@ -258,12 +300,19 @@ export default function IndexPage() {
     const [buyList, setBuyList] = useState<TradeItem[]>([emptyTradeItem()]);
     const [sellList, setSellList] = useState<TradeItem[]>([emptyTradeItem()]);
     const [leveragePrice, setLeveragePrice] = useState<number>(0);
+    const [isInitialized, setIsInitialized] = useState(false);
 
+    // بارگذاری اولیه از localStorage
     useEffect(() => {
         const savedBuy = localStorage.getItem(BUY_LIST_KEY);
         const savedSell = localStorage.getItem(SELL_LIST_KEY);
+        const savedLeverage = localStorage.getItem(LEVERAGE_PRICE_KEY);
+
         if (savedBuy) setBuyList(JSON.parse(savedBuy));
         if (savedSell) setSellList(JSON.parse(savedSell));
+        if (savedLeverage) setLeveragePrice(Number(savedLeverage));
+
+        setIsInitialized(true);
     }, []);
 
     const calcCurrentPrice = (item: TradeItem, lp: number) =>
@@ -282,39 +331,58 @@ export default function IndexPage() {
         field: keyof TradeItem,
         value: any
     ) =>
-        list.map((it, i) =>
-            i === idx
-                ? {
-                    ...it,
-                    [field]: value,
-                    currentPrice:
-                        field === "strikePrice" || field === "side" || field === "symbolInput"
-                            ? calcCurrentPrice({ ...it, [field]: value }, leveragePrice)
-                            : it.currentPrice,
-                }
-                : it
-        );
+        list.map((it, i) => {
+            if (i !== idx) return it;
+
+            let updatedItem = { ...it, [field]: value };
+
+            if (field === "symbolInput") {
+                const detectedSide = detectSideFromSymbol(value);
+                updatedItem = { ...updatedItem, side: detectedSide };
+            }
+
+            if (field === "strikePrice" || field === "side" || field === "symbolInput") {
+                updatedItem.currentPrice = calcCurrentPrice(updatedItem, leveragePrice);
+            }
+
+            return updatedItem;
+        });
 
     const handleBuyChange = (i: number, f: keyof TradeItem, v: any) =>
         setBuyList((l) => updateField(l, i, f, v));
     const handleSellChange = (i: number, f: keyof TradeItem, v: any) =>
         setSellList((l) => updateField(l, i, f, v));
 
+    // ذخیره در localStorage
     useEffect(() => {
-        localStorage.setItem(BUY_LIST_KEY, JSON.stringify(buyList));
-    }, [buyList]);
-    useEffect(() => {
-        localStorage.setItem(SELL_LIST_KEY, JSON.stringify(sellList));
-    }, [sellList]);
+        if (isInitialized) {
+            localStorage.setItem(BUY_LIST_KEY, JSON.stringify(buyList));
+        }
+    }, [buyList, isInitialized]);
 
     useEffect(() => {
-        setBuyList((l) =>
-            l.map((it) => ({ ...it, currentPrice: calcCurrentPrice(it, leveragePrice) }))
-        );
-        setSellList((l) =>
-            l.map((it) => ({ ...it, currentPrice: calcCurrentPrice(it, leveragePrice) }))
-        );
-    }, [leveragePrice]);
+        if (isInitialized) {
+            localStorage.setItem(SELL_LIST_KEY, JSON.stringify(sellList));
+        }
+    }, [sellList, isInitialized]);
+
+    useEffect(() => {
+        if (isInitialized) {
+            localStorage.setItem(LEVERAGE_PRICE_KEY, String(leveragePrice));
+        }
+    }, [leveragePrice, isInitialized]);
+
+    // بروزرسانی currentPrice فقط زمانی که leveragePrice تغییر کند
+    useEffect(() => {
+        if (isInitialized) {
+            setBuyList((l) =>
+                l.map((it) => ({ ...it, currentPrice: calcCurrentPrice(it, leveragePrice) }))
+            );
+            setSellList((l) =>
+                l.map((it) => ({ ...it, currentPrice: calcCurrentPrice(it, leveragePrice) }))
+            );
+        }
+    }, [leveragePrice, isInitialized]);
 
     const calcBuyProfit = useMemo(
         () =>
