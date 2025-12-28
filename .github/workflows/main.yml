@@ -25,14 +25,14 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
           sshpass -p $SERVER_PASSWORD ssh -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_IP << 'EOF'
-            cd digimal-react
+            cd borsbaba
             eval "$(ssh-agent -s)"
             ssh-add ~/gith
             git stash
             sudo -E git pull
             yarn install
             yarn build
-            pm2 stop promal || true
-            pm2 delete promal || true
-            pm2 start "yarn start" --name "promal"
+            pm2 stop borsbaba || true
+            pm2 delete borsbaba || true
+            pm2 start "yarn start -p 3600" --name "borsbaba"
           EOF
