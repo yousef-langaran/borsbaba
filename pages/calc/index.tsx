@@ -64,6 +64,15 @@ const detectSideFromSymbol = (symbol: string): SideType => {
     return "خودش";
 };
 
+// جفت btoa/atob فقط لاتین رو پشتیبانی می‌کنن، این تابع امکان دیکود متن فارسی base64‌شده رو می‌ده
+const b64DecodeUnicode = (str: string): string =>
+    decodeURIComponent(
+        atob(str)
+            .split("")
+            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+    );
+
 // ---------------- NumberInput Component با دکمه‌های افزایش/کاهش ----------------
 function NumberInput({
                          value,
@@ -304,8 +313,23 @@ export default function IndexPage() {
     const [leveragePrice, setLeveragePrice] = useState<number>(0);
     const [isInitialized, setIsInitialized] = useState(false);
 
-    // بارگذاری اولیه از localStorage
+    // بارگذاری اولیه: اگر لینکی با پارامتر data باز شده باشه (کپی‌شده از صفحه اصلی)، اون داده اولویت داره
     useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const dataParam = params.get("data");
+        if (dataParam) {
+            try {
+                const decoded = JSON.parse(b64DecodeUnicode(decodeURIComponent(dataParam)));
+                setBuyList(decoded.buy?.length ? decoded.buy : [emptyTradeItem()]);
+                setSellList(decoded.sell?.length ? decoded.sell : [emptyTradeItem()]);
+                window.history.replaceState({}, "", window.location.pathname);
+                setIsInitialized(true);
+                return;
+            } catch {
+                // اگر دیکود ناموفق بود، از localStorage بارگذاری کن
+            }
+        }
+
         const savedBuy = localStorage.getItem(BUY_LIST_KEY);
         const savedSell = localStorage.getItem(SELL_LIST_KEY);
         const savedLeverage = localStorage.getItem(LEVERAGE_PRICE_KEY);
