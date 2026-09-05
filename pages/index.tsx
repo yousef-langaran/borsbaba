@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState, useMemo} from 'react';
+import {useEffect, useState, useMemo, useRef} from 'react';
 import axios from 'axios';
 import {Autocomplete, AutocompleteItem} from '@nextui-org/react';
 import {Input} from '@nextui-org/input';
@@ -23,6 +23,7 @@ type TradeItem = {
     price: number;
     count: number;
     description: string;
+    color: string;
 };
 
 const emptyTradeItem = (): TradeItem => ({
@@ -33,11 +34,27 @@ const emptyTradeItem = (): TradeItem => ({
     nowPrice: {},
     price: 0,
     count: 0,
-    description: ''
+    description: '',
+    color: ''
 });
 
 const BUY_LIST_KEY = 'buyList';
 const SELL_LIST_KEY = 'sellList';
+
+// رنگ‌هایی که عمداً از طیف‌های مختلف (قرمز، سبز، آبی، زرد، بنفش، قهوه‌ای...) انتخاب شدن تا کاملاً از هم متمایز باشن
+const COLOR_PALETTE = [
+    '#e6194b', '#3cb44b', '#ffe119', '#4363d8',
+    '#f58231', '#911eb4', '#42d4f4', '#f032e6',
+    '#bfef45', '#fabed4', '#469990', '#9a6324'
+];
+
+function darkenColor(hex: string, amount = 0.35): string {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.max(0, Math.round(((num >> 16) & 0xff) * (1 - amount)));
+    const g = Math.max(0, Math.round(((num >> 8) & 0xff) * (1 - amount)));
+    const b = Math.max(0, Math.round((num & 0xff) * (1 - amount)));
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
 
 // ✅ جزء قابل مرتب‌سازی (ردیف منفرد)
 function SortableTradeRow({
@@ -63,10 +80,28 @@ function SortableTradeRow({
         transition,
     } = useSortable({ id });
 
-    const style = {
+    const [showPalette, setShowPalette] = useState(false);
+    const paletteRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
+                setShowPalette(false);
+            }
+        }
+        if (showPalette) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showPalette]);
+
+    const style: any = {
         transform: CSS.Transform.toString(transform),
         transition,
+        ...(item.color ? { '--row-color': item.color, '--row-border-color': darkenColor(item.color) } : {}),
     };
+
+    const inputWrapperClass = item.color
+        ? '!bg-[var(--row-color)] !border-2 !border-[var(--row-border-color)]'
+        : '';
 
     const rowProfit =
         type === 'buy'
@@ -76,13 +111,46 @@ function SortableTradeRow({
     return (
         <div ref={setNodeRef} style={style}>
             <div
-                className="flex gap-2 md:flex-row flex-col items-center my-2 bg-gray-50 rounded p-2"
-                style={{ cursor: 'grab' }}
+                className={`flex gap-2 md:flex-row flex-col items-center my-2 rounded p-2 ${item.color ? '' : 'bg-gray-50'}`}
+                style={{ cursor: 'grab', backgroundColor: item.color || undefined }}
             >
                 {/* 🔹 آیکون درگ */}
                 <span {...attributes} {...listeners} className="cursor-grab text-gray-400 hover:text-gray-600 flex items-center">
           <Icon icon="mdi:drag-variant" width="22" height="22" />
         </span>
+
+                {/* 🎨 انتخاب رنگ */}
+                <div ref={paletteRef} className="relative flex items-center">
+                    <button
+                        type="button"
+                        onClick={() => setShowPalette(v => !v)}
+                        className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: item.color || '#ffffff' }}
+                        title="انتخاب رنگ"
+                    >
+                        {!item.color && <Icon icon="mdi:palette-outline" width="16" height="16" className="text-gray-500" />}
+                    </button>
+                    {showPalette && (
+                        <div className="absolute z-20 top-9 right-0 w-44 grid grid-cols-4 gap-2 justify-items-center bg-white p-2 rounded shadow-lg border border-gray-200">
+                            {COLOR_PALETTE.map(c => (
+                                <button
+                                    key={c}
+                                    type="button"
+                                    onClick={() => { handleInputChange(idx, 'color', c); setShowPalette(false); }}
+                                    className="w-7 h-7 shrink-0 rounded-full border border-gray-300"
+                                    style={{ backgroundColor: c }}
+                                />
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => { handleInputChange(idx, 'color', ''); setShowPalette(false); }}
+                                className="col-span-4 mt-1 text-xs text-gray-500 hover:text-gray-700"
+                            >
+                                حذف رنگ
+                            </button>
+                        </div>
+                    )}
+                </div>
 
                 <Autocomplete
                     label={"نماد"}
@@ -90,6 +158,7 @@ function SortableTradeRow({
                     isLoading={item.loading}
                     onSelectionChange={val => handleInputChange(idx, 'selected', val)}
                     selectedKey={item.selected?.toString()}
+                    inputProps={{ classNames: { inputWrapper: inputWrapperClass } }}
                 >
                     {item.options.map(opt => (
                         <AutocompleteItem key={opt.insCode}>{opt.lVal18AFC}</AutocompleteItem>
@@ -97,17 +166,19 @@ function SortableTradeRow({
                 </Autocomplete>
 
                 <Input
-                    classNames={{inputWrapper: 'h-14'}}
+                    classNames={{inputWrapper: `h-14 ${inputWrapperClass}`}}
                     onValueChange={val => handleInputChange(idx, 'description', val)}
                     value={item.description ? String(item.description) : ''}
                 />
                 <Input
+                    classNames={{inputWrapper: inputWrapperClass}}
                     onValueChange={val => handleInputChange(idx, 'price', Number(val))}
                     type={"number"}
                     label={"قیمت"}
                     value={item.price ? String(item.price) : ''}
                 />
                 <Input
+                    classNames={{inputWrapper: inputWrapperClass}}
                     onValueChange={val => handleInputChange(idx, 'count', Number(val))}
                     type={"number"}
                     label={"تعداد"}
