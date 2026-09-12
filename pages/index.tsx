@@ -72,6 +72,36 @@ function b64DecodeUnicode(str: string): string {
     );
 }
 
+const APPLIED_SHARE_DATA_KEY = 'appliedShareData';
+
+// اگر آدرس صفحه پارامتر data داشته باشه (لینک کپی‌شده)، محتواش رو دیکود می‌کنه.
+// next/router موقع hydration خودش یک‌بار history رو با querystring اصلی هماهنگ می‌کنه و
+// پاک کردن آدرس همیشه قابل‌اعتماد نیست؛ برای همین با sessionStorage جلوی اعمال دوباره‌ی
+// همون لینک در رفرش‌های بعدی همین تب رو می‌گیریم (نه با پاک کردن آدرس)
+function readUrlPayload(): { buy?: any[]; sell?: any[] } | null {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    const dataParam = params.get('data');
+    if (!dataParam) return null;
+    if (sessionStorage.getItem(APPLIED_SHARE_DATA_KEY) === dataParam) return null;
+    try {
+        const decoded = JSON.parse(b64DecodeUnicode(decodeURIComponent(dataParam)));
+        sessionStorage.setItem(APPLIED_SHARE_DATA_KEY, dataParam);
+        try {
+            window.history.replaceState({}, '', window.location.pathname);
+        } catch {
+            // پاک نشدن آدرس مشکلی نیست؛ کنترل اصلی با sessionStorage انجام می‌شه
+        }
+        return decoded;
+    } catch {
+        return null;
+    }
+}
+
+function fromShareItem(it: any): TradeItem {
+    return { ...emptyTradeItem(), ...it };
+}
+
 const BUY_LIST_KEY = 'buyList';
 const SELL_LIST_KEY = 'sellList';
 
@@ -89,6 +119,17 @@ function darkenColor(hex: string, amount = 0.35): string {
     const g = Math.max(0, Math.round(((num >> 8) & 0xff) * (1 - amount)));
     const b = Math.max(0, Math.round((num & 0xff) * (1 - amount)));
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function formatNumber(num: number | string): string {
+    if (num === '' || num == null) return '';
+    const n = Number(String(num).replace(/,/g, ''));
+    if (isNaN(n) || n === 0) return '';
+    return n.toLocaleString('en-US');
+}
+
+function parseNumber(val: string): number {
+    return Number(String(val).replace(/,/g, '').trim() || '0');
 }
 
 function hexToRgba(hex: string, alpha = 0.1): string {
@@ -124,6 +165,7 @@ function SortableTradeRow({
     } = useSortable({ id });
 
     const [showPalette, setShowPalette] = useState(false);
+    const [priceFocused, setPriceFocused] = useState(false);
     const paletteRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -225,11 +267,13 @@ function SortableTradeRow({
                 <Input
                     className="flex-1 min-w-[150px]"
                     classNames={{inputWrapper: inputWrapperClass, input: 'text-2xl font-bold'}}
-                    onValueChange={val => handleInputChange(idx, 'price', Number(val))}
-                    type={"number"}
+                    onValueChange={val => handleInputChange(idx, 'price', parseNumber(val))}
+                    onFocus={() => setPriceFocused(true)}
+                    onBlur={() => setPriceFocused(false)}
+                    type={priceFocused ? "number" : "text"}
                     label={"قیمت"}
                     labelPlacement={"outside-left"}
-                    value={item.price ? String(item.price) : ''}
+                    value={priceFocused ? (item.price ? String(item.price) : '') : formatNumber(item.price)}
                 />
                 <Input
                     className="flex-1 min-w-[150px]"
@@ -262,28 +306,25 @@ function SortableTradeRow({
 
 export default function IndexPage() {
     const router = useRouter();
-    const [buyList, setBuyList] = useState<TradeItem[]>(() => loadListFromStorage(BUY_LIST_KEY) || [emptyTradeItem()]);
-    const [sellList, setSellList] = useState<TradeItem[]>(() => loadListFromStorage(SELL_LIST_KEY) || [emptyTradeItem()]);
+    // فقط یک‌بار (همون رندر اول) آدرس صفحه رو برای پارامتر data چک می‌کنه و از آدرس پاکش می‌کنه
+    const urlPayloadRef = useRef<{ buy?: any[]; sell?: any[] } | null | undefined>(undefined);
+    if (urlPayloadRef.current === undefined) {
+        urlPayloadRef.current = readUrlPayload();
+    }
+    const [buyList, setBuyList] = useState<TradeItem[]>(() =>
+        urlPayloadRef.current?.buy?.length
+            ? urlPayloadRef.current.buy.map(fromShareItem)
+            : loadListFromStorage(BUY_LIST_KEY) || [emptyTradeItem()]
+    );
+    const [sellList, setSellList] = useState<TradeItem[]>(() =>
+        urlPayloadRef.current?.sell?.length
+            ? urlPayloadRef.current.sell.map(fromShareItem)
+            : loadListFromStorage(SELL_LIST_KEY) || [emptyTradeItem()]
+    );
     const [mounted, setMounted] = useState(false);
     const [copyFeedback, setCopyFeedback] = useState(false);
 
     useEffect(() => setMounted(true), []);
-
-    // اگر لینک کپی‌شده (با پارامتر data) باز شده باشه، تنظیمات همون لحظه رو روی همین صفحه اعمال کن
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const dataParam = params.get('data');
-        if (!dataParam) return;
-        try {
-            const decoded = JSON.parse(b64DecodeUnicode(decodeURIComponent(dataParam)));
-            const fromShareItem = (it: any): TradeItem => ({ ...emptyTradeItem(), ...it });
-            if (decoded.buy?.length) setBuyList(decoded.buy.map(fromShareItem));
-            if (decoded.sell?.length) setSellList(decoded.sell.map(fromShareItem));
-        } catch {
-            // اگر لینک نامعتبر بود، وضعیت فعلی (localStorage) دست‌نخورده باقی می‌مونه
-        }
-        window.history.replaceState({}, '', window.location.pathname);
-    }, []);
 
     const sensors = useSensors(useSensor(PointerSensor));
 
